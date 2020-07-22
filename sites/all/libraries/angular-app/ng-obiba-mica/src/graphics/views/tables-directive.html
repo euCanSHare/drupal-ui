@@ -1,0 +1,27 @@
+<div>
+    <table ng-if="chartObject.entries && chartObject.entries.length" style="max-height: 400px;" class="table table-bordered table-striped" fixed-header="chartObject.getTable()">
+        <thead>
+        <tr>
+        <th ng-repeat="(value, header) in chartObject.header track by $index" width="{{100/chartObject.headerLength}}%"
+            ng-class="$index!=0 ? graphicTable.headerAlignment : ''">
+            {{header}}
+            <a ng-if="chartObject.sortedby.length > 0" class="pull-right">
+                <i ng-class="columnOrderClass(value)" ng-click="changeSorting(value)"></i>
+            </a>
+        </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="row in (sort.sortingOrder?(chartObject.entries | orderBy:sort.sortingOrder:sort.reverse):(chartObject.entries)) track by $index" >
+            <td ng-if="row.title.toLowerCase()!='total'">{{row.title}}</td>
+            <td ng-if="row.title.toLowerCase()=='total'"><b>{{row.title}}</b></td>
+            <td ng-if="isZero(row.value)" style="color: #7b8a8b"ng-class="[graphicTable.valuesAlignment,graphicTable.useMonoFont]" ng-bind-html="row.value"></td>
+            <td ng-if="!isZero(row.value)" ng-class="[graphicTable.valuesAlignment,graphicTable.useMonoFont]" ><a style="text-decoration: none" href ng-click="updateCriteria(row.key, chartObject.vocabulary)" ng-bind-html="row.value"></a></td>
+            <td ng-if="isZero(row.perc)" style="color: #7b8a8b" ng-class="[graphicTable.valuesAlignment,graphicTable.useMonoFont]" ng-bind-html="row.perc" ></td>
+            <td ng-if="row.perc && !isZero(row.perc)" ng-class="[graphicTable.valuesAlignment,graphicTable.useMonoFont]" ng-bind-html="row.perc"></td>
+            <td ng-if="row.participantsNbr" ng-class="[graphicTable.valuesAlignment,graphicTable.useMonoFont]" ng-bind-html="row.participantsNbr"></td>
+            <td ng-if="row.participantsNbr==0" ng-class="[graphicTable.valuesAlignment,graphicTable.useMonoFont]" style=" color: #7b8a8b">-</td>
+        </tr>
+        </tbody>
+    </table>
+</div>

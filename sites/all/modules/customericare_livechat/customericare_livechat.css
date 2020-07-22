@@ -1,0 +1,11 @@
+#account-choice {
+    margin: 10px 0 10px 0;
+}
+
+#account-choice label {
+    cursor: pointer;
+}
+
+#account-existing {
+    display: none;
+}

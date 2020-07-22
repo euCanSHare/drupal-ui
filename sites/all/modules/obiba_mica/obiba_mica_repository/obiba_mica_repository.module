@@ -1,0 +1,190 @@
+<?php
+/**
+ * Copyright (c) 2018 OBiBa. All rights reserved.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * @file code for obiba_mica_repository module
+ * */
+
+function obiba_mica_repository_menu() {
+  $items = array();
+  $items[ObibaSearchResources::MICA_REPOSITORY . '/taxonomies/_search/ws'] = array(
+    'page callback' => 'obiba_mica_repository_taxonomies_search',
+    'file' => 'obiba_mica_repository_services.inc',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items[ObibaSearchResources::MICA_REPOSITORY . '/taxonomies/_filter/ws'] = array(
+    'page callback' => 'obiba_mica_repository_taxonomies_filter',
+    'file' => 'obiba_mica_repository_services.inc',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items[ObibaSearchResources::MICA_REPOSITORY . '/%/_rql/ws'] = array(
+    'page callback' => 'obiba_mica_repository_query',
+    'file' => 'obiba_mica_repository_services.inc',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items[ObibaSearchResources::MICA_REPOSITORY . '/%/_rql_csv/ws'] = array(
+    'page callback' => 'obiba_mica_repository_query_as_csv',
+    'file' => 'obiba_mica_repository_services.inc',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items[ObibaSearchResources::MICA_REPOSITORY . '/studies/_report/ws'] = array(
+    'page callback' => 'obiba_mica_repository_query_as_csv_report',
+      'file' => 'obiba_mica_repository_services.inc',
+      'page arguments' => array(),
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
+  );
+  $items[ObibaSearchResources::MICA_REPOSITORY . '/studies/_report_by_network/%/%/ws'] = array(
+    'page callback' => 'obiba_mica_repository_query_as_csv_report_by_network',
+    'file' => 'obiba_mica_repository_services.inc',
+    'page arguments' => array(4, 5),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items[ObibaSearchResources::MICA_REPOSITORY . '/variables/_coverage/ws'] = array(
+    'page callback' => 'obiba_mica_repository_variable_coverage',
+    'file' => 'obiba_mica_repository_services.inc',
+    'page arguments' => array(),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items[ObibaSearchResources::MICA_REPOSITORY . '/variables/_coverage_download/ws'] = array(
+    'page callback' => 'obiba_mica_repository_variable_coverage_download',
+    'file' => 'obiba_mica_repository_services.inc',
+    'page arguments' => array(),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items[ObibaSearchResources::MICA_REPOSITORY . '/taxonomy/%/_filter/ws'] = array(
+    'page callback' => 'obiba_mica_angular_search_taxonomy_filter',
+    'file' => 'obiba_mica_repository_services.inc',
+    'page arguments' => array(3),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items[ObibaSearchResources::MICA_REPOSITORY . '/%/_suggest/ws'] = array(
+    'page callback' => 'obiba_mica_repository_get_document_suggestion',
+    'file' => 'obiba_mica_repository_services.inc',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+function obiba_mica_repository_menu_alter(&$items){
+  unset($items['mica/search']);
+  unset($items['mica/ng/coverage']);
+}
+
+function obiba_mica_repository_menu_link_alter(&$item){
+  $fragment = 'search';
+  if($item['link_path'] == ObibaSearchResources::MICA_REPOSITORY) {
+    $default_query_search = variable_get_value('default_query_search');
+    if (!empty($default_query_search)) {
+      $fragment = 'search?' . $default_query_search;
+    }
+    $item['options'] = array('fragment' => $fragment);
+  }
+}
+
+/**
+ * Implements hook_get_js().
+ */
+function obiba_mica_repository_get_js($weight_js) {
+  if (current_path() == MicaClientPathProvider::REPOSITORY_SEARCH) {
+    $module_path = drupal_get_path('module', 'obiba_mica_repository');
+    $js = file_scan_directory($module_path . '/js/app', '/.*\.js$/', array('key' => 'name'));
+    ksort($js);
+    foreach ($js as $file_js) {
+      drupal_add_js($file_js->uri, array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => ++$weight_js,
+      ));
+    }
+  }
+  $search_override_themes = obiba_mica_commons_enabled_theme(array(
+    'vocabularyFilterDetailHeading' => 'vocabulary-filter-detail-heading-component',
+  ));
+  if(!empty($search_override_themes)){
+    drupal_add_js(array(
+      'searchOverrideThemes' => $search_override_themes,
+    ),
+      'setting');
+  }
+  return ++$weight_js;
+}
+
+/**
+ * Implements hook_load_menus().
+ */
+function obiba_mica_repository_load_menus() {
+  $items = array();
+
+  $items[MicaClientPathProvider::REPOSITORY_SEARCH] = array(
+    'access callback' => TRUE,
+    'title' => variable_get('search_page_title', 'Search'),
+    'module_caller' => 'obiba_mica_repository',
+    'menu_name' => 'main-menu',
+    'weight' => 10,
+    'options' => array('fragment' => 'search'),
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_get_ng_module_to_load().
+ */
+function obiba_mica_repository_get_ng_module_to_load() {
+  if (current_path() == MicaClientPathProvider::REPOSITORY_SEARCH) {
+    obiba_mica_graphic_local_graphics_options();
+    return 'mica.ObibaSearch';
+  }
+  return FALSE;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function obiba_mica_repository_theme($existing, $type, $theme, $path) {
+  $path_template = $path . '/templates';
+  $path_views = $path . '/js/app/views';
+  return array(
+    'obiba_mica_repository_main_app' => array(
+      'template' => 'obiba_mica_repository_main_app',
+      'path' => $path_template,
+    ),
+    'obiba_mica_repository_classifications-view-header' => array(
+      'template' => 'obiba_mica_repository_classifications-view-header',
+      'path' => $path_views,
+    ),
+    'obiba_mica_repository_search-view-header' => array(
+      'template' => 'obiba_mica_repository_search-view-header',
+      'path' => $path_views,
+    ),
+  );
+
+}
+
+/**
+ * Main Search page
+ */
+function obiba_mica_repository_variable_page_search() {
+  return theme('obiba_mica_repository_main_app', array());
+}

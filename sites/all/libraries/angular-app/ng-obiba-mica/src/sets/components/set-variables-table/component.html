@@ -1,0 +1,94 @@
+<div>
+  <div class="pull-left" ng-show="$ctrl.documents.total>0">
+    <a href="" ng-click="$ctrl.addToSet(type)" class="action btn btn-info btn-responsive">
+      <i class="fa fa-plus"></i> {{'sets.add.button.set-label' | translate}}
+    </a>
+
+    <div ng-if="$ctrl.showAnalysis()" class="btn-group" uib-dropdown is-open="$ctrl.analysis.isopen">
+      <button id="single-button" type="button" class="btn btn-primary" uib-dropdown-toggle ng-disabled="disabled">
+        <i class="fa fa-cog"></i> {{'analysis.action' | translate}} <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
+        <li role="menuitem">
+          <a href="" ng-click="$ctrl.entitiesCount()">
+            {{'analysis.entities-count.action' | translate}}</a>
+        </li>
+      </ul>
+    </div>
+
+    <a obiba-file-download get-url="$ctrl.download()" target="_self" download class="action btn btn-info btn-responsive">
+      <i class="fa fa-download"></i> {{'download' | translate}}
+    </a>
+
+    <span ng-if="$ctrl.micaConfigShowOpalViews">
+      <a obiba-file-download get-url="$ctrl.opalExport()" target="_self" class="action btn btn-primary btn-responsive" download title="{{'sets.opal-views-download-button-help' | translate}}">
+        <i class="fa fa-download"></i> {{'sets.opal-views-download-button-text' | translate}}
+      </a>
+    </span>
+
+    <a ng-if="$ctrl.micaConfigShowSearch" href="" ng-click="$ctrl.search()" class="action btn btn-info btn-responsive">
+      <i class="fa fa-search"></i>
+    </a>
+
+    <a href="" ng-click="$ctrl.clearSet()" ng-disabled="!$ctrl.hasSelections()" class="action btn btn-danger btn-responsive">
+      <i class="fa fa-trash-o"></i>
+    </a>
+  </div>
+
+  <div ng-show="$ctrl.pagination.pageCount > 1" class="pull-right">
+    <span
+      uib-pagination
+      total-items="$ctrl.pagination.totalHits"
+      max-size="$ctrl.pagination.maxSize"
+      ng-model="$ctrl.pagination.currentPage"
+      boundary-links="true"
+      force-ellipses="true"
+      items-per-page="$ctrl.pagination.itemsPerPage"
+      previous-text="&lsaquo;"
+      next-text="&rsaquo;"
+      first-text="&laquo;"
+      last-text="&raquo;"
+      template-url="search/views/list/pagination-template.html"
+      ng-change="$ctrl.pageChanged()"></span>
+
+    <ul class="pagination pagination-sm">
+      <li>
+        <a href class="pagination-total">{{$ctrl.pagination.from}} - {{$ctrl.pagination.to}} {{'of' | translate}}
+          {{$ctrl.pagination.totalHits}}</a>
+      </li>
+    </ul>
+  </div>
+  <div class="clearfix"></div>
+
+  <div class="table-responsive">
+    <table-alert-header
+      all-selected="$ctrl.allSelected"
+      on-select-all="$ctrl.updateAllSelected()"
+      ng-show="$ctrl.allPageSelected[$ctrl.pagination.currentPage]">
+    </table-alert-header>
+    <table class="table table-bordered table-striped table-layout-fixed" ng-if="$ctrl.documents.total>0">
+      <thead>
+        <th class="checkbox-width">
+          <input ng-model="$ctrl.allPageSelected[$ctrl.pagination.currentPage]" type="checkbox" ng-click="$ctrl.updateAllCurrentPageSelected()" />
+        </th>
+        <th class="col-width-35" translate>taxonomy.target.variable</th>
+        <th class="col-width-35" translate>search.variable.label</th>
+        <th class="col-width-10" ng-if="$ctrl.options.variablesColumn.showVariablesTypeColumn" translate>type</th>
+        <th class="col-width-10" ng-if="$ctrl.options.variablesColumn.showVariablesStudiesColumn" translate>search.study.label</th>
+        <th class="col-width-15" ng-if="$ctrl.options.variablesColumn.showVariablesDatasetsColumn" translate>search.dataset.label</th>
+      </thead>
+      <tbody>
+        <tr ng-repeat="row in $ctrl.table.rows">
+          <td>
+            <input ng-model="$ctrl.selections[row[0].value]" type="checkbox" ng-click="$ctrl.updateSelection(row[0].value)" />
+          </td>
+          <td><a href="{{row[1].link}}">{{row[1].value}}</a></td>
+          <td>{{row[2].value}}</td>
+          <td ng-if="$ctrl.options.variablesColumn.showVariablesTypeColumn">{{'search.variable.' + row[3].value.toLowerCase() | translate}}</td>
+          <td ng-if="$ctrl.options.variablesColumn.showVariablesStudiesColumn"><a href="{{row[4].link}}">{{row[4].value}}</a></td>
+          <td ng-if="$ctrl.options.variablesColumn.showVariablesDatasetsColumn"><a href="{{row[5].link}}">{{row[5].value}}</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

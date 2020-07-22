@@ -1,0 +1,94 @@
+<?php
+/**
+ * Copyright (c) 2018 OBiBa. All rights reserved.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * @file
+ * Code to perform installation operations.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function obiba_mica_install() {
+  variable_set('mica-drupal-js-libraries-version', '2.1.0');
+  obiba_mica_block_configuration();
+  obiba_mica_theme_configuration();
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function obiba_mica_uninstall() {
+  variable_set('theme_default', 'bartik');
+  variable_set('admin_theme', 'seven');
+
+  variable_del('jquery_update_jquery_version');
+  variable_del('jquery_update_jquery_admin_version');
+
+  variable_del('obiba-progressbar-lib');
+  variable_del('obiba-progressbar-file');
+  variable_del('mica-drupal-js-libraries-version');
+}
+
+/**
+ * Block configuration.
+ *
+ * Disable the form search, the navigation block and the login block.
+ */
+function obiba_mica_block_configuration() {
+  $blocks = array(
+    'form',
+    'navigation',
+    'login',
+  );
+
+  foreach ($blocks as $block) {
+    db_update('block')->fields(array('status' => 0, 'region' => -1))
+      ->condition('delta', $block)
+      ->condition('theme', 'obiba_bootstrap')
+      ->execute();
+  }
+
+}
+
+/**
+ * Variable default settings.
+ */
+function obiba_mica_theme_configuration() {
+  variable_set('theme_default', 'obiba_bootstrap');
+  variable_set('admin_theme', 'seven');
+  variable_set('jquery_update_jquery_version', '1.10');
+  variable_set('jquery_update_jquery_admin_version', '1.10');
+
+  variable_set('obiba-progressbar-lib-version', '1.0.1');
+  variable_set('obiba-progressbar-lib', 'obiba-progressbar');
+  variable_set('obiba-progressbar-file', 'dist/obiba-progressbar');
+}
+
+/**
+ * Hook to remove old unused modules.
+ */
+function obiba_mica_update_7100() {
+  $modules = array(
+    'obiba_mica_search'
+  );
+  db_delete('system')
+    ->condition('name', $modules, 'IN')
+    ->condition('type', 'module')
+    ->execute();
+}
+
+/**
+ * Hook update
+ */
+function obiba_mica_update_7503() {
+  variable_set('obiba-progressbar-lib', 'obiba-progressbar');
+}

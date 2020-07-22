@@ -1,0 +1,45 @@
+<?php
+/**
+ * Copyright (c) 2018 OBiBa. All rights reserved.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * @file
+ * Code to perform installation operations
+ * */
+function obiba_mica_sets_install() {
+  obiba_mica_sets_permissions(array(
+    'mica-user' => array('can access sets'),
+    'mica-administrator' => array('can access sets'),
+    'mica-data-access-officer' => array('can access sets'),
+    'mica-editor' => array('can access sets'),
+    'mica-reviewer' => array('can access sets'),
+  ));
+  obiba_mica_sets_create_node();
+}
+
+function obiba_mica_sets_create_node() {
+  $content_to_create = obiba_mica_sets_content_to_create();
+  foreach ($content_to_create as $varibale_node => $node_content) {
+    $page = obiba_mica_commons_add_page($node_content['title'], $node_content['content']);
+    variable_set($varibale_node, $page->nid);
+  }
+}
+
+/**
+ * Function permission implementation
+ * @param $roles_actions array
+ */
+function obiba_mica_sets_permissions($roles_actions) {
+  foreach ($roles_actions as $role => $actions){
+    watchdog('Mica Client', 'Sets permissions For : @role added', array('@role' => $role), WATCHDOG_WARNING);
+    obiba_mica_commons_add_role($role);
+    obiba_mica_commons_apply_default_permissions($role, $actions);
+  }
+}

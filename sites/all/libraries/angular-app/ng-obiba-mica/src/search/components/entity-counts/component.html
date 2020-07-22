@@ -1,0 +1,9 @@
+<ul class="list-no-style list-inline">
+  <li ng-repeat="entity in $ctrl.resultTabsOrder">
+    <a href ng-click="$ctrl.selectType(entity)"
+        class="btn btn-xs"
+        ng-class="{'btn-default': (entity !== $ctrl.target), 'btn-primary': (entity === $ctrl.target)}">
+        {{$ctrl.taxonomyTypeMap[entity] | translate}} <span>{{$ctrl.getTotalHits(entity) | localizedNumber}}</span>
+    </a>
+  </li>
+</ul>

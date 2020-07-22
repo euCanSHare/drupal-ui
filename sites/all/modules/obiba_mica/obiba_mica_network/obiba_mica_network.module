@@ -1,0 +1,88 @@
+<?php
+/**
+ * Copyright (c) 2018 OBiBa. All rights reserved.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * @file
+ * Mica networks file
+ */
+
+include_once('obiba_mica_network_admin_form.inc');
+include_once 'obiba_mica_network-page-list.inc';
+
+function obiba_mica_network_menu() {
+  $items = array();
+
+  $items['mica/network/%'] = array(
+    'title' => 'Mica network detail',
+    'page callback' => 'obiba_mica_network_page_detail',
+    'file' => 'obiba_mica_network-page-detail.inc',
+    'access callback' => TRUE,
+    'page arguments' => array(2),
+  );
+
+  $items['mica/network/%/draft/%'] = array(
+    'title' => 'Mica network detail',
+    'page callback' => 'obiba_mica_network_page_detail',
+    'file' => 'obiba_mica_network-page-detail.inc',
+    'access callback' => TRUE,
+    'page arguments' => array(2, 4),
+  );
+
+  $items['mica/ng/coverage/network/%'] = array(
+    'page callback' => 'obiba_mica_network_ng_coverage',
+    'file' => 'obiba_mica_network-page-detail.inc',
+    'access callback' => TRUE,
+    'page arguments' => array(4),
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ *
+ * copy '<modules>/obiba_mica_network/templates/'   files in  your customized theme  '<YOUR_THEME>/templates/' path
+ * you can modify default display of listed page templates by rearrange block field for example
+ * don't forget to clear the theme registry.
+ *
+ */
+function obiba_mica_network_theme($existing, $type, $theme, $path) {
+  $path_theme = $path . '/templates';
+  return array(
+    'obiba_mica_network-detail' => array(
+      'template' => 'obiba_mica_network-detail',
+      'path' => $path_theme
+    ),
+    'obiba_mica_network-charts' => array(
+      'template' => 'obiba_mica_network-charts',
+      'path' => $path_theme
+    ),
+  );
+}
+
+function obiba_mica_network_networks_list($study_id = NULL) {
+  $cached_network_list_table = obiba_mica_commons_get_cache('cached_' . __FUNCTION__ . $study_id);
+  if (!empty($cached_network_list_table)) {
+    return $cached_network_list_table;
+  }
+  else {
+    $networks_table = obiba_mica_network_networks_table(obiba_mica_network_get_networks($study_id, NULL, 'numberOfStudies', 'desc'));
+    obiba_mica_commons_set_cache('cached_' . __FUNCTION__ . $study_id, $networks_table);
+    return $networks_table;
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function obiba_mica_network_form_obiba_mica_content_pages_admin_settings_alter(&$form, &$form_state, $form_id) {
+  obiba_mica_network_settings_admin_content($form);
+}

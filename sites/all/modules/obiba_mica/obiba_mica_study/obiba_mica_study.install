@@ -1,0 +1,38 @@
+<?php
+/**
+ * Copyright (c) 2018 OBiBa. All rights reserved.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * @file code to perform installation operations
+ *
+ * */
+
+function obiba_mica_study_install() {
+  obiba_mica_study_create_node();
+}
+
+function obiba_mica_study_create_node() {
+
+  $my_body_content = '<div> <p>This page displays the list of the consortium\'s studies. Each study is described in a same standard way that can be easily customized to reflect consortium specificities. However, Mica suggests by default a list of important study characteristics that should be considered if there is an aim for the consortium to participate in data harmonization projects with other consortia or studies.</p> </div> <hr/>';
+
+  $study_node_page = obiba_mica_commons_add_page(st('Studies'), st($my_body_content));
+  variable_set('study_list_page', $study_node_page->nid);
+
+}
+
+function obiba_mica_study_unset_variables(){
+  variable_del('study_target_number_participant_label');
+  variable_del('study_target_number_participant_with_sample_label');
+  variable_del('study_supplementary_information_about_target_number_participant');
+}
+
+function obiba_mica_study_update_7500(){
+  obiba_mica_commons_update_page_title( variable_get('study_list_page'), 'Individual Studies');
+}

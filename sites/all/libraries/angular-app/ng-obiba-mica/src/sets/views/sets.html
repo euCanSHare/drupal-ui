@@ -1,0 +1,50 @@
+<div>
+  <div ng-if="setsHeaderTemplateUrl" ng-include="setsHeaderTemplateUrl"></div>
+
+  <div class="row">
+    <div class="col-md-3">
+      <uib-accordion close-others="false">
+        <div uib-accordion-group class="panel-default" ng-repeat="tab in useableTabs" is-open="true">
+
+          <div uib-accordion-heading>
+            <span>
+              {{tab.title | localizedString}}
+            </span>
+
+            <a ng-if="canDelete[tab.name]" class="pull-right" href ng-click="$event.stopPropagation(); deleteChecked(tab.name)">
+              <i class="fa fa-trash-o"></i>
+            </a>
+          </div>
+
+          <span ng-if="!sets[tab.name].length" translate>sets.empty</span>
+
+          <ul class="nav nav-pills nav-stacked">
+            <li role="presentation" ng-repeat="set in sets[tab.name]" ng-class="{'active': selectedSet.id === set.id}">
+
+              <span class="checkbox no-margin-top no-margin-bottom" >
+                <input class="margin-top-10 margin-left--5" type="checkbox" ng-model="checked[tab.name][set.id]" ng-click="$event.stopPropagation(); check(tab.name);">
+              </span>
+              <a class="flex margin-left-10" href ng-click="$event.stopPropagation(); selectSet(tab.name, set);">
+                <span class="flex-item3">{{set.name}}</span>
+                <span class="flex-item1 text-right text-muted">{{set.count}}</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </uib-accordion>
+    </div>
+
+    <div class="col-md-9">
+      <span ng-if="loading" class="voffset2 loading"></span>
+      <div ng-repeat="tab in tabs" >
+        <set-variables-table ng-if="'variables' === tab.type"
+                             set-id="selectedSet.id"
+                             type="tab.type"
+                             options="tab.options"
+                             documents="documents"
+                             on-update="onUpdate"
+                             on-page-change="onPaginate"></set-variables-table>
+      </div>
+    </div>
+  </div>
+</div>

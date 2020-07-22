@@ -1,0 +1,57 @@
+<!--
+  ~ Copyright (c) 2018 OBiBa. All rights reserved.
+  ~
+  ~ This program and the accompanying materials
+  ~ are made available under the terms of the GNU Public License v3.0.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<div>
+
+  <div ng-if="headerTemplateUrl" ng-include="headerTemplateUrl"></div>
+
+  <obiba-alert id="DataAccessRequestEditController"></obiba-alert>
+
+  <!-- 'ng-if' does not bind the form to controller scope -->
+  <div ng-show="validForm">
+
+    <form name="form" role="form" novalidate class="ng-scope ng-invalid ng-invalid-required ng-dirty">
+      <div class="pull-right" ng-if="loaded">
+        <a ng-click="cancel()" type="button" class="btn btn-default">
+          <span translate>cancel</span>
+        </a>
+
+        <a ng-click="save()" type="button" class="btn btn-primary">
+          <span translate>save</span>
+        </a>
+
+        <a ng-click="validate(form)" type="button" class="btn btn-info">
+          <span translate>validate</span>
+        </a>
+      </div>
+
+      <div class="clearfix"></div>
+
+      <obiba-schema-form-renderer model="sfForm.model" schema-form="sfForm" read-only="false"></obiba-schema-form-renderer>
+
+      <div class="pull-right" ng-if="loaded">
+        <a ng-click="cancel()" type="button" class="btn btn-default">
+          <span translate>cancel</span>
+        </a>
+
+      <a ng-click="save()" type="button" class="btn btn-primary">
+        <span translate>save</span>
+      </a>
+
+        <a ng-click="validate(form)" type="button" class="btn btn-info">
+          <span translate>validate</span>
+        </a>
+      </div>
+    </form>
+
+    <div class="clearfix voffet2"></div>
+  </div>
+
+</div>

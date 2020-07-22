@@ -1,0 +1,12 @@
+<div>
+  <div ng-if="entitiesHeaderTemplateUrl" ng-include="entitiesHeaderTemplateUrl"></div>
+  <div>
+      <span class="btn btn-primary" ng-show="result.counts">
+        <span ng-show="result.counts.length>0" translate>{{result.counts[0].entityType}}</span>
+        <span class="badge">{{localizedTotal}}</span>
+      </span>
+      <span ng-if="loading" class="voffset2 loading"></span>
+  </div>
+  <entities-count-result-table ng-hide="loading && !result.total" result="result"></entities-count-result-table>
+  <p ng-hide="query" translate>analysis.entities-count.no-query</p>
+</div>

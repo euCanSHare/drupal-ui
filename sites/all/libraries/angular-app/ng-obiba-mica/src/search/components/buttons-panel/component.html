@@ -1,0 +1,40 @@
+<!--
+  ~ Copyright (c) 2019 OBiBa. All rights reserved.
+  ~
+  ~ This program and the accompanying materials
+  ~ are made available under the terms of the GNU Public License v3.0.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<div>
+  <a ng-if="!$ctrl.showIconForPanelButton"
+     href
+     class="btn btn-sm btn-default"
+     ng-click="$ctrl.toggleLeftPanelVisibility()"
+     title="{{$ctrl.showPanel ? 'search.left-panel-close-tooltip' : 'search.left-panel-open-tooltip' | translate}}">
+     <span><i class="fa" ng-class="{'fa-times': $ctrl.showPanel, 'fa-bars': !$ctrl.showPanel}"></i></span>
+  </a>
+  <a ng-if="!$ctrl.showIconForFullscreenButton"
+    href
+     class="btn btn-sm btn-default pull-right"
+     ng-click="$ctrl.toggleFullscreen()"
+     title="{{$ctrl.isFullscreen ? 'exit-fullscreen' : 'fullscreen' | translate}}">
+     <i class="glyphicon"
+       ng-class="{'glyphicon-resize-full': !$ctrl.isFullscreen, 'glyphicon-resize-small': $ctrl.isFullscreen}"></i>
+  </a>
+
+  <a ng-if="$ctrl.showIconForPanelButton"
+     href
+     class="btn btn-xs btn-default"
+     ng-click="$ctrl.toggleLeftPanelVisibility()">
+     <span>{{$ctrl.showPanel ? 'search.left-panel-close-title' : 'search.left-panel-open-title' | translate}}</span>
+  </a>
+  <a ng-if="$ctrl.showIconForFullscreenButton"
+     href
+     class="btn btn-xs btn-default pull-right"
+     ng-click="$ctrl.toggleFullscreen()">
+     <span>{{$ctrl.isFullscreen ? 'search.exit-fullscreen-title' : 'search.enter-fullscreen-title' | translate}}</span>
+  </a>
+</div>

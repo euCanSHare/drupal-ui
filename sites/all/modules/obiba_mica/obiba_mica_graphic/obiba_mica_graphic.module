@@ -1,0 +1,603 @@
+<?php
+/**
+ * Copyright (c) 2018 OBiBa. All rights reserved.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * @file
+ * Obiba Mica Graphic file
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function obiba_mica_graphic_menu() {
+  $items = array();
+
+  $items['admin/config/obiba-mica/obiba_mica_graphic'] = array(
+    'title' => 'Graphics settings',
+    'description' => 'Configure settings of graphics.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('obiba_mica_graphic_settings_form'),
+    'access arguments' => array('administer obiba mica graphic'),
+    'file' => 'obiba_mica_graphic.admin.inc',
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ *
+ * copy '<modules>/obiba_mica_network/templates/'   files in  your customized
+ * theme  '<YOUR_THEME>/templates/' path you can modify default display of
+ * listed page templates by rearrange block field for example don't forget to
+ * clear the theme registry.
+ *
+ */
+function obiba_mica_graphic_theme($existing, $type, $theme, $path) {
+  $path_theme = $path . '/templates';
+  $path_views_theme = $path . '/js/app/views';
+  return array(
+    'obiba_mica_angular_app_charts_' . NetworkStatistics::GEO_NBR_STAT => array(
+      'template' => 'obiba_mica_angular_app_charts_' . NetworkStatistics::GEO_NBR_STAT,
+      'path' => $path_theme
+    ),
+    'obiba_mica_angular_app_charts_' . NetworkStatistics::METHODS_DESIGNS => array(
+      'template' => 'obiba_mica_angular_app_charts_' . NetworkStatistics::METHODS_DESIGNS,
+      'path' => $path_theme
+    ),
+    'obiba_mica_angular_app_charts_' . NetworkStatistics::NUMBER_PARTICIPANTS => array(
+      'template' => 'obiba_mica_angular_app_charts_' . NetworkStatistics::NUMBER_PARTICIPANTS,
+      'path' => $path_theme
+    ),
+    'obiba_mica_angular_app_charts_' . NetworkStatistics::BIO_SAMPLES => array(
+      'template' => 'obiba_mica_angular_app_charts_' . NetworkStatistics::BIO_SAMPLES,
+      'path' => $path_theme
+    ),
+    'graphic-main' => array(
+      'template' => 'graphic-main',
+      'path' => $path_views_theme
+    ),
+    'graphic-chart-container' => array(
+      'template' => 'graphic-chart-container',
+      'path' => $path_views_theme
+    ),
+
+    'graphic-chart-block-container' => array(
+      'template' => 'graphic-chart-block-container',
+      'path' => $path_views_theme
+    ),
+  );
+}
+
+/**
+ * Default blocks definition
+ */
+function obiba_mica_graphic_default_block() {
+  $graphics_blocks_aggregations = variable_get_value('graphics_blocks_aggregations');
+  return array(
+    NetworkStatistics::GEO_NBR_STAT => array(
+      'info' => t('Geographical distribution for studies'),
+      'region' => 'content',
+      'visibility' => BLOCK_VISIBILITY_LISTED,
+      'pages' => '<front>',
+      'weight' => -13,
+    ),
+    NetworkStatistics::METHODS_DESIGNS => array(
+      'info' => t('Study design'),
+      'region' => 'content',
+      'visibility' => BLOCK_VISIBILITY_LISTED,
+      'pages' => '<front>',
+      'weight' => -12,
+    ),
+    NetworkStatistics::NUMBER_PARTICIPANTS => array(
+      'info' => t('Number of Participants'),
+      'region' => 'content',
+      'visibility' => BLOCK_VISIBILITY_LISTED,
+      'pages' => '<front>',
+      'weight' => -11,
+    ),
+    NetworkStatistics::BIO_SAMPLES =>
+      array(
+        'info' => t('Biological Samples'),
+        'region' => 'content',
+        'visibility' => BLOCK_VISIBILITY_LISTED,
+        'pages' => '<front>',
+        'weight' => -10,
+      ),
+  );
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function obiba_mica_graphic_block_info() {
+  return obiba_mica_graphic_default_block();
+}
+
+function obiba_mica_graphic_preprocess_block(&$variables) {
+  if ($variables['block']->module == 'obiba_mica_graphic') {
+    switch ($variables['block']->delta) {
+      case NetworkStatistics::GEO_NBR_STAT:
+      case NetworkStatistics::METHODS_DESIGNS :
+      case NetworkStatistics::NUMBER_PARTICIPANTS :
+      case NetworkStatistics::BIO_SAMPLES :
+        $graphics_blocks_aggregations = variable_get_value('graphics_blocks_aggregations');
+        $variables['classes_array'][] = drupal_html_class($graphics_blocks_aggregations[$variables['block']->delta]['value_name']);
+    }
+  }
+
+}
+
+
+/**
+ * Implements hook_block_view().
+ */
+function obiba_mica_graphic_block_view($delta = '') {
+  $block = array();
+  $aggregations_to_show = variable_get_value('graphics_blocks_aggregations');
+  $block_delta_parameters = NetworkStatistics::deltaAggregationsMap();
+  if ((!empty($aggregations_to_show) && $aggregations_to_show !== 'none')) {
+    if ($delta == NetworkStatistics::GEO_NBR_STAT ||
+      $delta == NetworkStatistics::METHODS_DESIGNS ||
+      $delta == NetworkStatistics::NUMBER_PARTICIPANTS ||
+      $delta == NetworkStatistics::BIO_SAMPLES
+    ) {
+      obiba_mica_app_angular_load_js_resources('obiba_mica_graphic');
+    }
+    $graphics_bocks = variable_get_value('graphics_blocks');
+    $colors_options = obiba_mica_graphic_charts_colors_options_settings();
+    switch ($delta) {
+      case NetworkStatistics::GEO_NBR_STAT:
+        if (!empty($aggregations_to_show) && $aggregations_to_show[NetworkStatistics::GEO_NBR_STAT]['enable'] !== 0) {
+          if (!empty($graphics_bocks)) {
+            $block['content'] = theme('obiba_mica_angular_app_charts_' . NetworkStatistics::GEO_NBR_STAT);
+            drupal_add_js(array(
+              'GraphicChartsOptions' =>
+                array(
+                  'entityType' => 'network',
+                  'entityIds' => implode(',', variable_get_value('graphics_blocks_networks')),
+                  'ChartsOptions' => obiba_mica_graphic_charts_options_settings('geoChart', $colors_options)
+                ),
+            ),
+              'setting');
+          }
+        }
+        break;
+
+      case NetworkStatistics::METHODS_DESIGNS:
+        if (!empty($aggregations_to_show) && $aggregations_to_show[NetworkStatistics::METHODS_DESIGNS]['enable'] !== 0) {
+          if (!empty($graphics_bocks)) {
+            $block['content'] = theme('obiba_mica_angular_app_charts_' . NetworkStatistics::METHODS_DESIGNS);
+            drupal_add_js(array(
+              'GraphicChartsOptions' =>
+                array(
+                  'entityType' => 'network',
+                  'entityIds' => implode(',', variable_get_value('graphics_blocks_networks')),
+                  'ChartsOptions' => obiba_mica_graphic_charts_options_settings('studiesDesigns', $colors_options),
+                ),
+            ),
+              'setting');
+          }
+        }
+        break;
+
+      case NetworkStatistics::NUMBER_PARTICIPANTS:
+        if (!empty($aggregations_to_show) && $aggregations_to_show[NetworkStatistics::NUMBER_PARTICIPANTS]['enable'] !== 0) {
+          if (!empty($graphics_bocks)) {
+            $block['content'] = theme('obiba_mica_angular_app_charts_' . NetworkStatistics::NUMBER_PARTICIPANTS);
+            drupal_add_js(array(
+              'GraphicChartsOptions' =>
+                array(
+                  'entityType' => 'network',
+                  'entityIds' => implode(',', variable_get_value('graphics_blocks_networks')),
+                  'ChartsOptions' => obiba_mica_graphic_charts_options_settings('numberParticipants', $colors_options),
+                ),
+            ),
+              'setting');
+          }
+        }
+        break;
+
+      case NetworkStatistics::BIO_SAMPLES:
+        if (!empty($aggregations_to_show) && $aggregations_to_show[NetworkStatistics::BIO_SAMPLES]['enable'] !== 0) {
+          if (!empty($graphics_bocks)) {
+            $block['content'] = theme('obiba_mica_angular_app_charts_' . NetworkStatistics::BIO_SAMPLES);
+            drupal_add_js(array(
+              'GraphicChartsOptions' =>
+                array(
+                  'entityType' => 'network',
+                  'entityIds' => implode(',', variable_get_value('graphics_blocks_networks')),
+                  'ChartsOptions' => obiba_mica_graphic_charts_options_settings('biologicalSamples', $colors_options),
+                ),
+            ),
+              'setting');
+          }
+        }
+        break;
+      case NetworkStatistics::START_YEAR:
+        if (!empty($aggregations_to_show) && $aggregations_to_show[NetworkStatistics::START_YEAR]['enable'] !== 0) {
+          if (!empty($graphics_bocks)) {
+            $block['content'] = theme('obiba_mica_angular_app_charts_' . NetworkStatistics::START_YEAR);
+            drupal_add_js(array(
+              'GraphicChartsOptions' =>
+                array(
+                  'entityType' => 'network',
+                  'entityIds' => implode(',', variable_get_value('graphics_blocks_networks')),
+                  'ChartsOptions' => obiba_mica_graphic_charts_options_settings('startYear', $colors_options),
+                ),
+            ),
+              'setting');
+          }
+        }
+        break;
+    }
+    return $block;
+
+  }
+}
+
+/**
+ * Implements hook_get_js().
+ */
+function obiba_mica_graphic_get_js($weight_js) {
+  $module_path = drupal_get_path('module', 'obiba_mica_graphic');
+  $js = file_scan_directory($module_path . '/js/app', '/.*\.js$/', array('key' => 'name'));
+  ksort($js);
+  foreach ($js as $file_js) {
+    drupal_add_js($file_js->uri, array(
+      'type' => 'file',
+      'scope' => 'footer',
+      'weight' => ++$weight_js
+    ));
+  }
+  return $weight_js;
+}
+
+/**
+ * Implements hook_get_ng_module_to_load().
+ */
+function obiba_mica_graphic_get_ng_module_to_load() {
+  return 'mica.ObibaGraphicCharts';
+}
+
+/**
+ * Set Pie charts graphics options
+ */
+function obiba_mica_graphic_charts_options_settings($aggregation_option, $custom_options = NULL) {
+  $default_options = array(
+    'options' => array(),
+  );
+  if (!empty($custom_options)) {
+    $options_result = array_merge_recursive($default_options['options'], $custom_options);
+    $options[$aggregation_option]['options'] = $options_result;
+  }
+  return $options;
+}
+
+
+/**
+ * Get Local charts Options.
+ *
+ * @param $graphics_options .
+ *
+ * @return array.
+ */
+function obiba_mica_graphic_local_graphics_options($graphics_options = NULL) {
+  $graphic_override_themes = obiba_mica_commons_enabled_theme(
+      array(
+      'graphicTableDirectiveTemplate' => 'graphic-table-directive-template',
+    )
+  );
+
+  $colors_options = obiba_mica_graphic_charts_colors_options_settings();
+  $charts_option = array_merge(
+    obiba_mica_graphic_charts_options_settings('geoChart',$colors_options),
+    obiba_mica_graphic_charts_options_settings('studiesDesigns', $colors_options),
+    obiba_mica_graphic_charts_options_settings('biologicalSamples', $colors_options),
+    obiba_mica_graphic_charts_options_settings('numberParticipants', $colors_options),
+    obiba_mica_graphic_charts_options_settings('startYear', $colors_options)
+  );
+    $graphics_options['headerAlignment'] = variable_get_value('graphics_table_headerAlignment');
+    $graphics_options['valuesAlignment'] = variable_get_value('graphics_table_valuesAlignment');
+    $graphics_options['useMonoFont'] = variable_get_value('graphics_table_useMonoFont');
+    $graphics_options['fixWidth'] = variable_get_value('graphics_table_fixWidth');
+  if (!empty($graphics_options)) {
+    $Graphic_charts_options = array_merge($graphics_options, array(
+      'ChartsOptions' => !empty($charts_option) ? $charts_option : NULL
+    ));
+  }
+  else {
+    $Graphic_charts_options = array(
+      'ChartsOptions' => !empty($charts_option) ? $charts_option : NULL,
+    );
+  }
+  if(!empty($graphic_override_themes)){
+    $Graphic_charts_options['overrideTheme'] = $graphic_override_themes;
+  }
+  drupal_add_js(array(
+    'GraphicChartsOptions' => $Graphic_charts_options
+  ),
+    'setting');
+
+}
+
+/**
+ * Get default colors options
+ */
+function obiba_mica_graphic_charts_colors_options_settings() {
+  $options_colors = array();
+  $colors = variable_get_value('mica_graphic_colors');
+  if (empty($colors) || $colors == 'none') {
+    return NULL;
+  }
+  $colors_setting = array_filter($colors, function ($color) {
+    return !empty($color['enable']);
+  });
+  uasort($colors_setting, '_obiba_mica_graphic_colors_options_array_sort');
+  foreach ($colors_setting as $nbr => $color) {
+    $options_colors[] = $color['value_name'];
+  }
+  if (!empty($options_colors)) {
+    return array('colors' => $options_colors);
+  }
+}
+
+
+/**
+ * Custom array sort function by weight to display the taxonomies widget items
+ * in correct order.
+ *
+ * @param $a
+ * @param $b
+ * @return int
+ */
+function _obiba_mica_graphic_colors_options_array_sort($a, $b) {
+  if (isset($a['weight']) && isset($b['weight'])) {
+    return $a['weight'] < $b['weight'] ? -1 : 1;
+  }
+  return 0;
+}
+
+function obiba_mica_graphics_do_coverage_query($query, $includeTerms = FALSE) {
+  $search_resources = new ObibaSearchResources();
+  $coverages = $search_resources->taxonomiesChartRql($query, 'variables', 'coverage', $includeTerms);
+  return $coverages;
+}
+
+function obiba_mica_graphics_nvd3_query_charts($query, $search_query_template, $entity_id, $empty_value_key = NULL, $entity_graph = NULL, $includeTerms = FALSE) {
+  $cached_chart = obiba_mica_commons_get_cache(__FUNCTION__ . $query);
+  if(!empty($cached_chart)){
+      $response = $cached_chart;
+  }
+  else{
+    // Get some configuration settings
+    $colors_graphics_configuration = obiba_mica_graphic_charts_colors_options_settings();
+    $number_bars = intval(variable_get_value('graphics_barChart_numberBars'));
+    $graphic_margins = array(
+      'left' => intval(variable_get_value('graphics_barChart_graphicMargins_left')),
+      'top' => intval(variable_get_value('graphics_barChart_graphicMargins_top')),
+      'right' => intval(variable_get_value('graphics_barChart_graphicMargins_right')),
+      'bottom' => intval(variable_get_value('graphics_barChart_graphicMargins_bottom')),
+    );
+    $rotate_labels = intval(variable_get_value('graphics_barChart_rotateLabels'));
+    $enable_ellipses = variable_get_value('graphics_barChart_enableEllipses');
+    $horizontal_barChar_margin_left = intval(variable_get_value('graphics_horizontal_barChart_graphic_margins_left'));
+    $horizontal_barChar_truncated = intval(variable_get_value('graphics_horizontal_barChart_truncated'));
+    $response = new stdClass();
+    $response->charts = array();
+    $taxonomies_config = obiba_mica_commons_taxonomies_filter_array('mica_taxonomy_figures');
+    $coverages = obiba_mica_graphics_do_coverage_query($query, $includeTerms);
+    $base_path = !empty($GLOBALS['conf']['clean_url']) ? base_path() : base_path().'?q=';
+
+    $response = new stdClass();
+    $response->charts = array();
+
+    if (isset($coverages->charts)) {
+
+      // exclude taxonomies not found in config
+      array_filter($coverages->charts, function($chart)
+        use ($taxonomies_config,
+          $coverages,
+          $entity_id,
+          $base_path,
+          $search_query_template,
+          $response,
+          $empty_value_key,
+          $colors_graphics_configuration,
+          $graphic_margins,
+          $rotate_labels,
+          $enable_ellipses,
+          $number_bars,
+          $entity_graph,
+          $includeTerms,
+          $horizontal_barChar_margin_left,
+          $horizontal_barChar_truncated) {
+
+        if (array_key_exists($chart->taxonomy, $taxonomies_config) !== false) {
+          $chart_formatted = new stdClass();
+          $chart_formatted->title = $chart->title;
+          $chart_formatted->subtitle = $chart->subtitle;
+          $chart_formatted->taxonomy = $chart->taxonomy;
+          $chart_formatted->variableData = array();
+          $chart_formatted->color = $colors_graphics_configuration;
+
+          $chart_formatted->data = array();
+          $chart_formatted->renderOptions = new stdClass();
+          $chart_formatted->renderOptions->numberBars = $number_bars;
+          $chart_formatted->renderOptions->graphicMargins = $graphic_margins;
+          $chart_formatted->renderOptions->rotateLabels = $rotate_labels;
+          $chart_formatted->renderOptions->enableEllipses = $enable_ellipses;
+          $chart_formatted->renderOptions->horizontalBarCharMarginLeft = $horizontal_barChar_margin_left;
+          $chart_formatted->renderOptions->horizontalBarCharTruncated = $horizontal_barChar_truncated;
+          array_push($response->charts, $chart_formatted);
+
+          if (isset($chart->data)) {
+            $zero_sum_key_data = NULL;
+            $filtered_zero_chart_data = array_filter($chart->data, function($data){
+              $values_sum = 0;
+              foreach ($data->items as $item){
+                $values_sum += $item->value;
+              }
+              if($values_sum !==0 ){
+                return $data;
+              }
+            });
+            $bar_chart_number  = sizeof($filtered_zero_chart_data);
+            $chart_formatted->renderOptions->nbrStack = $bar_chart_number;
+            if($entity_graph == 'network' && !empty($includeTerms)){
+              $countBar = array_reduce($chart->data, function($total, $data){
+                if(!empty($data->termItems)){
+                  $total += sizeof($data->termItems);
+                }
+                return $total;
+              });
+                $chart_formatted->renderOptions->graphicHeight = $countBar * 25;
+                $chart_formatted->renderOptions->graphicChartType = 'multiBarHorizontalChart';
+              $chart_formatted->subtitle = $taxonomies_config[$chart->taxonomy]['graphic_title'];
+              obiba_mica_graphics_nvd3_build_network_bucket($chart_formatted,
+                $filtered_zero_chart_data,
+                $search_query_template,
+                $base_path,
+                $chart,
+                $empty_value_key,
+                $includeTerms,
+                $horizontal_barChar_truncated);
+            }
+            else{
+              $empty_value_key = ($entity_graph == 'network') ? NULL : $empty_value_key;
+              obiba_mica_graphics_nvd3_build_bucket($chart_formatted, $filtered_zero_chart_data,
+                $search_query_template,
+                $enable_ellipses,
+                $bar_chart_number,
+                $entity_id,
+                $base_path,
+                $chart,
+                $number_bars,
+                $empty_value_key);
+            }
+          }
+          return true;
+        }
+
+        return false;
+      });
+
+      usort($response->charts, function($a, $b) use($taxonomies_config) {
+        $aIndex = array_search($a->taxonomy, array_keys($taxonomies_config));
+        $bIndex = array_search($b->taxonomy, array_keys($taxonomies_config));
+        return $aIndex - $bIndex;
+      });
+
+    }
+    
+    obiba_mica_commons_set_cache(__FUNCTION__ . $query, $response);
+  }
+
+  return drupal_json_output($response);
+}
+
+function obiba_mica_graphics_nvd3_build_network_bucket(&$chart_formatted,
+                                               $filtered_zero_chart_data,
+                                               $search_query_template,
+                                               $base_path,
+                                               $chart,
+                                               $empty_value_key,
+                                               $includeTerms = FALSE,
+                                               $horizontal_barChar_truncated = 0){
+  $to_pushItem = new stdClass();
+  $to_pushItem->values = array();
+  foreach ($filtered_zero_chart_data as $key => $data) {
+            if (isset($data->items)) {
+              $study_item = new stdClass();
+              $study_item->value =  $data->items;
+              $termItems = [];
+              if(!empty($data->termItems) && !empty($includeTerms)){
+                $study_item->value =  sizeOf($data->items);
+                foreach ($data->termItems as $itemTerm){
+                  $termItems[] = array(
+                    'term' => ($horizontal_barChar_truncated !== 0) ?
+                      truncate_utf8($itemTerm->items[0]->title, $horizontal_barChar_truncated, FALSE, TRUE) :
+                      $itemTerm->items[0]->title,
+                    'notEllipsedTitle' => $itemTerm->items[0]->title,
+                    'value' => sizeof($itemTerm->items),
+                    'link' =>
+                      $base_path .
+                      MicaClientPathProvider::REPOSITORY_SEARCH .
+                      '#/search?query=' .
+                      sprintf($search_query_template, $chart->taxonomy . '.' . $data->vocabulary, $itemTerm->term) .
+                      '&display=list&type=studies'
+                  );
+                }
+                $study_item->itemTerm = $termItems;
+              }
+              $studies_id = [];
+              foreach ($data->items as $item){
+                $studies_id[] = $item->key;
+              }
+              $study_item->link =
+                $base_path .
+                MicaClientPathProvider::REPOSITORY_SEARCH .
+                '#/search?query=' .
+                sprintf($search_query_template, $chart->taxonomy, $data->vocabulary, implode(',', $studies_id)) .
+                '&display=list&type=studies';
+              $study_item->key = $data->vocabulary;
+              $study_item->notEllipsedTitle = $data->items[0]->title;
+              $study_item->title = truncate_utf8($data->items[0]->title, 35, FALSE, TRUE);
+              $to_pushItem->key = $study_item->key;
+              $to_pushItem->values[] = $study_item;
+            if($study_item->value !== 0){
+                if (!empty($empty_value_key)) {
+                  $study_item->key = $empty_value_key;
+                  array_push($chart_formatted->variableData, $study_item);
+                } else {
+                  array_push($chart_formatted->data, $to_pushItem);
+                }
+            }
+          }
+  }
+}
+
+function obiba_mica_graphics_nvd3_build_bucket(&$chart_formatted, $filtered_zero_chart_data,
+                                               $search_query_template,
+                                               $enable_ellipses,
+                                               $bar_chart_number,
+                                               $entity_id,
+                                               $base_path,
+                                               $chart,
+                                               $number_bars, $empty_value_key){
+  foreach ($filtered_zero_chart_data as $key => $data) {
+    if (isset($data->items)) {
+      foreach ($data->items as $item) {
+        if (!empty($item->key) || !empty($empty_value_key)) {
+          $query_entity = empty($item->key) ? $entity_id : $item->key;
+          $item->link =
+            $base_path .
+            MicaClientPathProvider::REPOSITORY_SEARCH .
+            '#/search?query=' .
+            sprintf($search_query_template, $chart->taxonomy, $data->vocabulary, urlencode(urlencode($query_entity))) .
+            '&display=list&type=variables';
+          $item->notEllipsedTitle = $item->title;
+          if($enable_ellipses && $bar_chart_number > $number_bars){
+            $item->title = truncate_utf8($item->title, 35, FALSE, TRUE);
+          }
+          if($item->value !== 0){
+            if (!empty($empty_value_key)) {
+              $item->key = $empty_value_key;
+              array_push($chart_formatted->variableData, $item);
+            } else {
+              array_push($chart_formatted->data, $item);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

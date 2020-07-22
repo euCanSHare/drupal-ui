@@ -1,0 +1,103 @@
+<div id="search-region" class="{{tabs && tabs.length>1 ? 'tab-content voffset4' : ''}}">
+  <div ng-if="$ctrl.options.showSearchBox" id="search-box-region" class="{{hasFacetedTaxonomies ? '' : 'row'}}">
+    <div class="{{hasFacetedTaxonomies ? '' : 'col-md-3'}}"></div>
+    <div class="{{hasFacetedTaxonomies ? '' : 'col-md-6'}}">
+      <script type="text/ng-template" id="customTemplate.html">
+        <a ng-if="match.model.id">
+          <table style="border:none;">
+            <tbody>
+            <tr>
+              <td style="min-width: 30px;">
+                <span title="{{match.model.target + '-classifications' | translate}}">
+                  <i class="{{'i-obiba-large i-obiba-' + match.model.target}}"></i>
+                </span>
+              </td>
+              <td>
+            <span
+              uib-popover-html="match.model.itemDescription | uibTypeaheadHighlight:query"
+              popover-title="{{match.model.itemTitle}}"
+              popover-placement="bottom"
+              popover-trigger="'mouseenter'"
+              ng-bind-html="match.model.itemTitle | uibTypeaheadHighlight:query">
+            </span>
+                <small class="help-block no-margin" title="{{match.model.itemParentDescription}}">
+                  {{match.model.itemParentTitle}}
+                </small>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </a>
+        <a ng-if="!match.model.id" class="{{match.model.status}}">
+          <small class="help-block no-margin">
+            {{match.model.message}}
+          </small>
+        </a>
+      </script>
+      <span class="input-group input-group-sm">
+        <span class="input-group-btn" uib-dropdown>
+          <button type="button" class="btn btn-primary" uib-dropdown-toggle>
+            {{'taxonomy.target.' + ($ctrl.documents.search.target ? $ctrl.documents.search.target : 'all')| translate}}
+            <span class="caret"></span>
+          </button>
+          <ul uib-dropdown-menu role="menu">
+            <li>
+              <a href ng-click="$ctrl.selectSearchTarget()" translate>taxonomy.target.all</a>
+            </li>
+            <li ng-repeat="target in $ctrl.targets" role="menuitem">
+              <a href ng-click="$ctrl.selectSearchTarget(target)">{{'taxonomy.target.' + target | translate}}</a>
+            </li>
+          </ul>
+        </span>
+        <input type="text" ng-model="$ctrl.selectedCriteria" placeholder="{{'search.placeholder.' + ($ctrl.documents.search.target ? $ctrl.documents.search.target : 'all') | translate}}"
+          uib-typeahead="criteria for criteria in $ctrl.searchCriteria($viewValue)" typeahead-min-length="2" typeahead-loading="$ctrl.documents.search.active"
+          typeahead-template-url="customTemplate.html" typeahead-on-select="$ctrl.selectCriteria($item)" class="form-control">
+        <span class="input-group-addon">
+          <i class="fa fa-search"></i>
+        </span>
+        <span ng-if="$ctrl.options.SearchHelpLinkUrl" class="input-group-btn">
+          <a type="button" target="_blank" class="btn btn-default" href="{{$ctrl.options.SearchHelpLinkUrl}}">
+            <span class="fa fa-question-circle"></span> {{$ctrl.options.SearchHelpLinkLabel}}</a>
+        </span>
+      </span>
+
+    </div>
+  </div>
+  <div ng-if="$ctrl.options.showSearchBrowser" id="search-selector-region" class="{{hasFacetedTaxonomies ? '' : 'row'}}">
+    <div class="{{hasFacetedTaxonomies ? '' : 'col-md-3'}}"></div>
+    <div class="{{hasFacetedTaxonomies ? '' : 'col-md-6'}}">
+      <small>
+        <ul class="nav nav-pills taxo-element">
+          <li ng-if="hasClassificationsTitle">
+            <label class="nav-label" translate>search.classifications-title</label>
+          </li>
+          <li ng-repeat="t in $ctrl.taxonomyNav track by $index" title="{{$ctrl.translateTaxonomyNav(t, 'description')}}">
+            <a href ng-click="$ctrl.showTaxonomy(t.target, t.name)" ng-if="!t.terms">{{$ctrl.translateTaxonomyNav(t, 'title')}}</a>
+            <span uib-dropdown ng-if="t.terms">
+              <ul class="nav nav-pills">
+                <li>
+                  <a href uib-dropdown-toggle>{{$ctrl.translateTaxonomyNav(t, 'title')}}
+                    <span class="caret"></span>
+                  </a>
+                </li>
+              </ul>
+              <ul uib-dropdown-menu class="innerul">
+                <li ng-repeat="st in t.terms">
+                  <a href ng-click="$ctrl.showTaxonomy(t.target, st.name)" title="{{$ctrl.translateTaxonomyNav(st, 'description')}}">{{$ctrl.translateTaxonomyNav(st, 'title')}}</a>
+                </li>
+              </ul>
+            </span>
+          </li>
+          <li>
+            <a href ng-click="$ctrl.goToClassifications()" title="{{'search.classifications-show' | translate}}">
+              <span ng-if="hasClassificationsLinkLabel" translate>search.classifications-link</span>
+              <i class="fa fa-ellipsis-h" ng-if="!hasClassificationsLinkLabel"></i>
+            </a>
+          </li>
+        </ul>
+      </small>
+    </div>
+  </div>
+  <taxonomies-panel ng-if="$ctrl.options.showSearchBrowser" taxonomy-name="$ctrl.taxonomyName" target="$ctrl.target" on-select-term="$ctrl.selectTerm"
+    on-close="$ctrl.clearTaxonomy" lang="$ctrl.lang" taxonomies-shown="$ctrl.taxonomiesShown"></taxonomies-panel>
+</div>

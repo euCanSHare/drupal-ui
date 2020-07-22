@@ -1,0 +1,56 @@
+<!--
+  ~ Copyright (c) 2018 OBiBa. All rights reserved.
+  ~
+  ~ This program and the accompanying materials
+  ~ are made available under the terms of the GNU Public License v3.0.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<div ng-if="actions.canEditActionLogs(dataAccessRequest)">
+  <action-log-editor source-collection="dataAccessRequest.actionLogHistory" predefined-actions="dataAccessForm.predefinedActions"
+    update="updateActionLogs(logs)"></action-log-editor>
+</div>
+<div class="table-responsive">
+  <table id="data-access-request-history" class="table table-bordered table-striped" obiba-table-sorter="logsHistory">
+    <thead>
+      <tr>
+        <th class="status-icon"></th>
+        <th translate>status</th>
+        <th translate>changed-by</th>
+        <th data-column-name="changedOn" translate>changed-on</th>
+        <th class="col-xs-1" ng-if="actions.canEditActionLogs(dataAccessRequest)" translate>actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="log in logsHistory track by $index">
+        <td>
+          <span>
+            <i class="{{log.icon}} hoffset"></i>
+          </span>
+        </td>
+        <td>
+          <span ng-if="log.reference">{{'data-access-amendment.title' | translate}}
+            <a ng-href="#{{'/data-access-request/' + dataAccessRequest.id + '/amendment/' + log.reference}}">{{log.reference}}</a>
+          </span>
+          {{log.msg | translate}}
+        </td>
+        <td>{{UserProfileService.getFullName(log.profile) || log.author}}</td>
+        <td>
+          <span title="{{log.changedOn | amDateFormat: 'lll'}}">
+            {{log.changedOn | amCalendar}}
+          </span>
+        </td>
+        <td ng-if="actions.canEditActionLogs(dataAccessRequest)">
+          <span ng-if="!loading">
+            <action-log-item-editor item="log" source-collection="dataAccessRequest.actionLogHistory" predefined-actions="dataAccessForm.predefinedActions"
+              update="updateActionLogs(logs)"></action-log-item-editor>
+          </span>
+          
+          <span class="loading" ng-if="loading"></span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

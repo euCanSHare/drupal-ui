@@ -1,0 +1,24 @@
+<?php
+/**
+ * Copyright (c) 2018 OBiBa. All rights reserved.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * @file
+ * Code to perform installation operations
+ * */
+function obiba_mica_network_install() {
+  obiba_mica_network_create_node();
+}
+
+function obiba_mica_network_create_node() {
+  $my_body_content = '<div> <p>This page displays the list of networks. By clicking on the links below, users can learn about an specific network and its associated studies  .</p> </div> <hr/>';
+  $node_page = obiba_mica_commons_add_page(st('Networks'), st($my_body_content));
+  variable_set('networks_page', $node_page->nid);
+}

@@ -1,0 +1,67 @@
+<?php
+/**
+ * Copyright (c) 2018 OBiBa. All rights reserved.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * @file
+ * Code to perform module installation operations
+ */
+
+/**
+ * Implements hook_install().
+ */
+function obiba_mica_dataset_install() {
+  obiba_mica_dataset_create_node();
+  variable_set('obiba_mica_dataset_harmonization_status', obiba_dataset_harmonization_default_settings());
+}
+
+/**
+ * Create page node content for the dataset page.
+ */
+function obiba_mica_dataset_create_node() {
+//@TODO add update function to edit and replace respective node title (Harmonization Datasets -> Harmonized Datasets, Study Datasets -> Collected Datasets)
+  $my_body_content = '<p>To harmonize data between studies participating in the consortium, study-specific datasets and Harmonized Datasets (i.e. variables targeted for harmonization) are used and made available to investigators. Variables collected by each study and those defined in the Harmonization Dataset are described using a standardized data dictionary which covers variable definitions and characteristics (e.g. type, unit, categories, and area of information covered). Once Collected Datasets and a Harmonized Dataset are defined and loaded in the system, variable-specific mapping algorithms are developed in order to derive the collected datasets into the common format defined in the Harmonization Dataset. In order to increase transparency of the harmonization process, these resources are made available to the research community.&nbsp;</p><hr/>';
+
+  $dataset_page = obiba_mica_commons_add_page(st('Datasets'), st($my_body_content));
+  variable_set('dataset_page', $dataset_page->nid);
+
+  $harmonized_dataset_page = obiba_mica_commons_add_page(st('Harmonized Datasets'),
+    st('<p>A Harmonized Dataset documents and annotates a set of core variables which provides a concise but effective list of information to be harmonized in a specific scientific context. Variables found in a Harmonization Dataset therefore represent the reference format into which study-specific data needs to be processed to arrive at harmonized data. When a study can generate a variable defined in a Harmonized Dataset, a processing algorithm is developed to map study-specific data to the variable format defined in the Harmonized Dataset.</p><hr/>'));
+  variable_set('harmo_dataset_page', $harmonized_dataset_page->nid);
+
+  $collected_dataset_page = obiba_mica_commons_add_page(st('Collected Datasets'), st('<p>A Collected Dataset holds and describes variables collected by studies participating in a consortium. Collected Datasets make use of standardized data dictionary which gives information on variable definitions and characteristics (e.g. type, unit, categories, and area of information covered). Using the variable search tool, researchers are able to query data collected across studies participating in the consortium.</p><hr/>'));
+  variable_set('study_dataset_page', $collected_dataset_page->nid);
+}
+
+function obiba_mica_dataset_update_7500(){
+  obiba_mica_commons_update_page_title( variable_get('harmo_dataset_page'), 'Harmonized Datasets');
+  obiba_mica_commons_update_page_title( variable_get('study_dataset_page'), 'Collected Datasets');
+}
+
+/**
+* Delete unused variables
+**/
+function obiba_mica_dataset_update_7501(){
+$default_harmonization = obiba_dataset_harmonization_default_settings();
+$impossible_icone = variable_get('dataset_harmonization_impossible_icon');
+$default_harmonization['impossible']['icon'] = 'glyphicon ' . ($impossible_icone == 'glyphicon-remove' ? 'glyphicon-remove alert-danger' : 'glyphicon-minus alert-black');
+$default_harmonization['impossible']['title'] = variable_get('dataset_harmonization_impossible_label');
+$default_harmonization['impossible']['description'] = variable_get('dataset_harmonization_impossible_description');
+$default_harmonization['undetermined']['description'] = variable_get('dataset_harmonization_undetermined_description');
+$default_harmonization['complete']['description'] = variable_get('dataset_harmonization_complete_description');
+variable_set('obiba_mica_dataset_harmonization_status', $default_harmonization);
+variable_del('dataset_harmonization_impossible_icon');
+variable_del('dataset_harmonization_impossible_label');
+variable_del('dataset_harmonization_undetermined_icon');
+variable_del('dataset_harmonization_undetermined_label');
+variable_del('dataset_harmonization_undetermined_description');
+variable_del('dataset_harmonization_impossible_description');
+variable_del('dataset_harmonization_complete_description');
+}

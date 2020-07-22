@@ -1,0 +1,24 @@
+<?php
+
+function consumeAPI_menu() {
+
+$items = array();
+
+$items[‘admin/config/content/consumeAPI’] = array(
+
+‘title’ => ‘Configuration of consumeAPI’,
+
+‘description’ => Configure the consumeAPI module,
+
+‘page callback’ => ‘drupal_get_form’,
+
+‘page arguments’ => array(‘firstmod_admin’),
+
+‘access arguments’ => array(‘administer firstmod settings’),
+
+‘type’ => MENU_NORMAL_ITEM, );
+
+return $items; 
+
+}
+

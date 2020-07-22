@@ -1,0 +1,47 @@
+<?php
+/**
+ * Copyright (c) 2018 OBiBa. All rights reserved.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function obiba_mica_data_access_request_install() {
+  obiba_mica_data_access_request_permissions(array(
+    'mica-data-access-officer' => array(
+      'can_see_' . MicaDataAccessRequest::LIST_DATA_ACCESS,
+      'can_see_' . MicaDataAccessRequest::LIST_USERS_DATA_ACCESS
+    ),
+    'mica-user' => array(
+      'can_see_' . MicaDataAccessRequest::LIST_DATA_ACCESS,
+      'can_see_' . MicaDataAccessRequest::NEW_DATA_ACCESS,
+    )));
+  obiba_mica_data_access_request_create_node();
+}
+
+/**
+ * Create page node content for the data access request page.
+ */
+function obiba_mica_data_access_request_create_node() {
+  $my_body_content = "<div> <p>Requests for further information on the datasets and requests for access are received by the our Access Office. Prior to submitting a Data Access Application Form, we strongly recommend that you consult the our Policy documents, that will provide you with detailed information about the process and our's access, publication and intellectual property policies.</p> </div>";
+  $access_request_node_page = obiba_mica_commons_add_page(st('Data Access'), st($my_body_content));
+  variable_set('access_request_page', $access_request_node_page->nid);
+}
+
+/**
+ * Function permission implementation
+ * @param $roles_actions array
+ */
+function obiba_mica_data_access_request_permissions($roles_actions) {
+  foreach ($roles_actions as $role => $actions){
+    watchdog('Mica Client', 'Data access permissions For : @role added', array('@role' => $role), WATCHDOG_WARNING);
+    obiba_mica_commons_add_role($role);
+    obiba_mica_commons_apply_default_permissions($role, $actions);
+  }
+}

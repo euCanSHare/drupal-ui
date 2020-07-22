@@ -1,0 +1,9 @@
+<div class="input-group">
+    <input type="text" class="form-control"
+    placeholder="{{'search.match.placeholder' | translate}}"
+    ng-model="$ctrl.vocabulary.matchString"
+    ng-keyup="$ctrl.enterText($event)">
+    <span class="input-group-btn">
+      <button class="btn btn-default" type="button" ng-disabled="!$ctrl.vocabulary.matchString" ng-click="$ctrl.altEnterText($event, $ctrl.vocabulary.matchString)"><i class="fa fa-check"></i></button>
+    </span>
+</div>

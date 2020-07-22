@@ -1,0 +1,12 @@
+<div ng-show="$ctrl.visible === true" class="coverage-row-popup" id="row-popup">
+  <div class="coverage-row-popup-content">
+      <table class="table table-striped table-condensed no-padding no-margin">
+        <tr>
+          <th ng-repeat="value in $ctrl.headers">{{value}}</th>
+        </tr>
+        <tr>
+          <td ng-repeat="value in $ctrl.content">{{value}}</td>
+        </tr>
+      </table>
+  </div>
+</div>

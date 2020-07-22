@@ -1,0 +1,101 @@
+<div>
+    <div class="col-md-12"><div ng-if="loading" class="loading "></div></div>
+    <div ng-show="!loading" class="col-md-12">
+        <p class="help-block" ng-if="!summaries || !summaries.length" translate>search.study.noResults</p>
+        <div ng-if="summaries && summaries.length" ng-init="lang = $parent.$parent.lang">
+            <div ng-repeat="summary in summaries"
+                 ng-init="lang = $parent.$parent.lang; studyPath= summary.studyResourcePath=='individual-study'?'individual-study':'harmonization-study'"
+                 class="row lg-bottom-margin document-item-list flex-row"
+                 test-ref="study">
+
+                <div class="col-md-2 hidden-xs hidden-sm text-center">
+
+                    <img ng-if="summary.logo" ng-src="{{summary.logoUrl}}"
+                         class="img-responsive"/>
+
+                    <h1 ng-if="!summary.logo" src="" alt=""
+                        class="big-character">
+                        <span class="t_badge color_light i-obiba-S"></span>
+                    </h1>
+                </div>
+
+                <div class="col-md-10  col-sm-12 col-xs-12">
+                    <h4>
+                        <a href="{{PageUrlService.studyPage( summary.id, studyPath)}}">
+                            <localized value="summary.name"
+                                       lang="lang"></localized>
+                        </a>
+                    </h4>
+                    <p ng-if="options.obibaListOptions.studiesTrimmedDescription">
+                        <localized value="summary.objectives" lang="lang"
+                                   ellipsis-size="250"
+                                   markdown-it="true"></localized>
+                    </p>
+                    <p ng-if="!options.obibaListOptions.studiesTrimmedDescription">
+                        <localized value="summary.objectives" lang="lang"
+                                   markdown-it="true"></localized>
+                    </p>
+                    <a ng-if="summary.objectives" href="{{PageUrlService.studyPage( summary.id, studyPath)}}" >{{"global.read-more" | translate}}</a>
+                    <div class="clear-fix"></div>
+                    <div ng-if="options.obibaListOptions.studiesSupplInfoDetails" class="voffset3">
+                        <blockquote-small
+                                ng-if="summary.design || summary.targetNumber.noLimit"
+                                class="help-block">
+                                <span ng-if="summary.design">
+                                {{"search.study.design" | translate}} : {{ summary.design === undefined ? '-' : 'study_taxonomy.vocabulary.methods-design.term.' + summary.design + '.title' | translate}}
+                                </span> -
+                            <span ng-if="summary.targetNumber.number">
+                                 {{"numberOfParticipants.participants" | translate}} : <localized-number
+                                    value="summary.targetNumber.number"></localized-number>
+                                </span>
+                            <span ng-if="summary.targetNumber.noLimit">
+                                    <span ng-if="summary.design">; </span>
+                                    {{"numberOfParticipants.no-limit" | translate}}
+                                </span>
+                        </blockquote-small>
+                        <div class="sm-top-margin">
+                            {{counts=summary['obiba.mica.CountStatsDto.studyCountStats'];""}}
+                            <badge-count ng-if="counts.networks"
+                                        badge-class="'btn btn-default btn-xxs'"
+                                        entity-count="counts.networks"
+                                        entity-type="'networks'"
+                                        label-badge="counts.networks>1?'networks':'network.label'"
+                                        badge-options="options.obibaListOptions.showNetworkBadge"
+                                        query="'network(in(Mica_network.studyIds,' + summary.id +  '))'">
+                            </badge-count>
+
+                            {{datasetsCount=counts.studyDatasets +
+                            counts.harmonizationDatasets;""}}
+                            <badge-count ng-if="datasetsCount"
+                                        badge-class="'btn btn-default btn-xxs'"
+                                        entity-count="datasetsCount"
+                                        entity-type="'datasets'"
+                                        label-badge="datasetsCount>1?'datasets':'dataset.details'"
+                                        badge-options="options.obibaListOptions.showDatasetBadge"
+                                        query="'study(in(Mica_study.id,' + summary.id + '))'">
+                            </badge-count>
+                            <badge-count ng-if="counts.studyVariables"
+                                         badge-class="'btn btn-default btn-xxs'"
+                                         entity-count="counts.studyVariables"
+                                         entity-type="'variables'"
+                                         label-badge="counts.studyVariables>1?'client.label.study-variables':'client.label.study-variable'"
+                                         badge-options="options.obibaListOptions.showVariableBadge"
+                                         query="'study(in(Mica_study.id,' + summary.id + ')),variable(in(Mica_variable.variableType,Collected))'">
+                            </badge-count>
+                            <badge-count ng-if="counts.dataschemaVariables"
+                                         badge-class="'btn btn-default btn-xxs'"
+                                         entity-count="counts.dataschemaVariables"
+                                         entity-type="'variables'"
+                                         label-badge="counts.dataschemaVariables>1?'client.label.dataschema-variables':'client.label.dataschema-variable'"
+                                         badge-options="options.obibaListOptions.showVariableBadge"
+                                         query="'study(in(Mica_study.id,' + summary.id + ')),variable(in(Mica_variable.variableType,Dataschema))'">
+                            </badge-count>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

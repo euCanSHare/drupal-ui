@@ -1,0 +1,12 @@
+<div class="panel-primary">
+  <div class="panel-heading">
+    <div><strong>{{$ctrl.taxonomy.title | localizedString}}</strong></div>
+  </div>
+
+  <vocabulary-filter-detail
+      ng-repeat="vocabulary in $ctrl.vocabularies"
+      vocabulary="vocabulary"
+      on-select-vocabulary-args="$ctrl.selectVocabularyArgs(vocabulary, args)"
+      on-remove-criterion="$ctrl.removeCriterion(item)">
+  </vocabulary-filter-detail>
+</div>

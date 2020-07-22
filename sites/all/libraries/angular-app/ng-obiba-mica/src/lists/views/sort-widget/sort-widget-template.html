@@ -1,0 +1,20 @@
+<div class="btn-group dropdown">
+    <button id="SortOrder" type="button" class="btn-sm btn btn-primary dropdown-toggle"
+            data-toggle="dropdown">
+           {{selected.label | translate}}
+        <i ng-if="selected.value.startsWith('-') && selected.label !== 'relevance'"
+           class="fa fa-long-arrow-down"></i>
+        <i ng-if="!selected.value.startsWith('-') && selected.label !== 'relevance'"
+           class="fa fa-long-arrow-up"></i>
+    </button>
+    <ul class="dropdown-menu" role="menu" uib-dropdown-menu aria-labelledby="SortOrder">
+        <li ng-repeat="option in selectSortOrder.options" role="menuitem">
+            <a ng-click="selectSortOrderOption(option)" href><span translate>{{option.label}}</span>
+               <i ng-if="option.value.startsWith('-') && option.label !== 'relevance'"
+                  class="fa fa-long-arrow-down"></i>
+               <i ng-if="!option.value.startsWith('-') && option.label !== 'relevance'"
+                  class="fa fa-long-arrow-up"></i>
+            </a>
+        </li>
+    </ul>
+</div>

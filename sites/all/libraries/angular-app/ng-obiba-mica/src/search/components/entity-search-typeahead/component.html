@@ -1,0 +1,22 @@
+<div class="input-group">
+  <div class="form-group has-feedback ">
+    <input type="search"
+           ng-model="$ctrl.model"
+           ng-attr-placeholder="{{$ctrl.placeholderText | translate}}"
+           uib-typeahead="suggestion for suggestion in $ctrl.suggest($viewValue)"
+           typeahead-focus-first="false"
+           typeahead-on-select="$ctrl.select($item)"
+           ng-keyup="$ctrl.onKeyUp($event)"
+           class="form-control">
+    <span ng-if="$ctrl.model"
+          ng-click="$ctrl.clear()"
+          class="form-control-feedback form-control-clear width-initial height-initial padding-right-10">
+        <i class="fa fa-times"></i>
+    </span>
+  </div>
+  <span ng-show="$ctrl.showButton" class="input-group-btn">
+    <button type="submit" class="btn btn-default" ng-click="$ctrl.select($ctrl.model)">
+      <i class="fa fa-search"></i>
+    </button>
+  </span>
+</div>

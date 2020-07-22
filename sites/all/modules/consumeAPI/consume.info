@@ -1,0 +1,9 @@
+name = "consumeAPI"
+
+description = "This module will consume external API from Drupal client."
+
+core = 7.x
+
+dependencies[] = http_client
+
+configure = admin/config/content/consumeAPI

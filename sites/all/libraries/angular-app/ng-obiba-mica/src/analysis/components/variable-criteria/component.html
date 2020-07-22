@@ -1,0 +1,165 @@
+<div>
+  <p ng-if="$ctrl.loading" class="voffset2 loading"></p>
+  
+  <div  ng-hide="$ctrl.loading" class="btn-group voffset1 btn-variable" ng-class="{open: $ctrl.state.open}" ng-keyup="$ctrl.onKeyup($event)">
+
+    <button class="btn btn-xs dropdown btn-variable" ng-click="$ctrl.openDropdown()">
+      <span title="{{$ctrl.getQueryTitle(false)}}" test-ref="search-criterion">
+        {{$ctrl.getQueryTitle(true)}}
+      </span>
+      <span class="fa fa-caret-down"></span>
+    </button>
+    <button class="btn btn-xs btn-default" ng-click="$ctrl.onRemove()">
+      <span class="fa fa-times"></span>
+    </button>
+
+    <ul class="dropdown-menu query-dropdown-menu" aria-labelledby="">
+        <li class="criteria-list-item">
+          <span>{{$ctrl.variable.name}}</span>
+          <span class="pull-right" title="{{'search.close-and-search' | translate}}" ng-click="$ctrl.closeDropdown()"><i class="fa fa-check"></i></span>
+        </li>
+        <li class='divider'></li>
+        <li class="criteria-list-item">
+          <label title="{{'analysis.all-help' | translate}}">
+            <input ng-click="$ctrl.onUpdateOperation()" type="radio" ng-model="$ctrl.selectedOperation" value="all">
+              {{'analysis.all' | translate}}
+          </label>
+          <div class="pull-right">
+            <span class="agg-term-count">{{$ctrl.localizeNumber($ctrl.allFrequency)}}</span>
+          </div>
+        </li>
+        <li class="criteria-list-item">
+          <label title="{{'analysis.exists-help' | translate}}">
+            <input ng-click="$ctrl.onUpdateOperation()" type="radio" ng-model="$ctrl.selectedOperation" value="exists">
+              {{'analysis.exists' | translate}}
+          </label>
+          <div class="pull-right">
+            <span class="agg-term-count">{{$ctrl.localizeNumber($ctrl.existsFrequency)}}</span>
+          </div>
+        </li>
+        <li class="criteria-list-item">
+          <label title="{{'analysis.empty-help' | translate}}">
+            <input ng-click="$ctrl.onUpdateOperation()" type="radio" ng-model="$ctrl.selectedOperation" value="empty">
+              {{'analysis.empty' | translate}}
+          </label>
+          <div class="pull-right">
+            <span class="agg-term-count">{{$ctrl.localizeNumber($ctrl.emptyFrequency)}}</span>
+          </div>
+        </li>
+        <li class="criteria-list-item" ng-if="$ctrl.showInOperations()">
+          <label title="{{'analysis.in-help' | translate}}">
+            <input ng-click="$ctrl.onUpdateOperation()" type="radio" ng-model="$ctrl.selectedOperation" value="in">
+              {{'analysis.in' | translate}}
+          </label>
+        </li>
+        <li class="criteria-list-item" ng-if="$ctrl.showInOperations()">
+          <label title="{{'analysis.out-help' | translate}}">
+            <input ng-click="$ctrl.onUpdateOperation()" type="radio" ng-model="$ctrl.selectedOperation" value="out">
+              {{'analysis.out' | translate}}
+          </label>
+        <li>
+
+        <li class="divider" ng-if="$ctrl.showCategoricalOptions()"></li>
+        <li class="criteria-list-item" ng-if="$ctrl.showCategoricalOptions() && $ctrl.categoriesData && $ctrl.categoriesData.length>10">
+          <span class="input-group input-group-sm no-padding-top">
+            <input ng-model="$ctrl.searchText" type="text" class="form-control" aria-describedby="category-search" ng-keyup="$ctrl.onSearchTextKeyup($event)">
+            <span class="input-group-addon" id="category-search"><i class="fa fa-search"></i></span>
+          </span>
+        </li>
+        <li ng-if="$ctrl.showCategoricalOptions()">
+          <ul class="no-padding criteria-list-terms">
+            <li class="criteria-list-item" ng-if="category.visible" ng-repeat="category in $ctrl.categoriesData">
+              <label class="control-label">
+                <input 
+                  ng-model="$ctrl.selectedCategories[category.name]"
+                  type="checkbox"
+                  ng-click="$ctrl.updateSelection()"/>
+                  <span title="{{category.name}}">{{category.label}}</span>
+              </label>
+              <div class="pull-right">
+                <span class="agg-term-count">{{$ctrl.localizeNumber(category.frequency)}}</span>
+              </div>
+            </li>
+          </ul>
+        </li>
+
+        <li class="divider" ng-if="$ctrl.showNumericalOptions()"></li>
+        <li class="criteria-list-item" ng-if="$ctrl.showNumericalOptions()">
+          <select class="form-control input-sm form-select" ng-model="$ctrl.selectedNumericalOperation">
+            <option value="range">{{'analysis.range' | translate}}</option>
+            <option value="in">{{'analysis.values' | translate}}</option>
+          </select>
+        </li>
+        <li class="criteria-list-item" ng-if="$ctrl.showNumericalOptions() && $ctrl.selectedNumericalOperation === 'range'">
+          <div class="row">
+            <div class="col-xs-6">
+              <div class="form-group">
+                <label for="range-min" translate>analysis.min</label>
+                <input ng-model="$ctrl.selectedMin" type="text" class="form-control" id="range-min" ng-keyup="$ctrl.onNumericalMinKeyup($event)" placeholder="{{$ctrl.rangeMin}}">
+              </div>
+            </div>
+            <div class="col-xs-6">
+              <div class="form-group">
+                <label for="range-max" translate>analysis.max</label>
+                <input ng-model="$ctrl.selectedMax" type="text" class="form-control" id="range-max" ng-keyup="$ctrl.onNumericalMaxKeyup($event)" placeholder="{{$ctrl.rangeMax}}">
+              </div>    
+            </div>
+          </div>
+        </li>
+        <li class="criteria-list-item" ng-if="$ctrl.showNumericalOptions() && $ctrl.selectedNumericalOperation === 'in'">
+          <div class="form-group">
+            <label for="in-values" translate>analysis.values-title</label>
+            <input ng-model="$ctrl.selectedNumericalValues" type="text" class="form-control" id="in-values" ng-keyup="$ctrl.onNumericalValuesKeyup($event)">
+          </div>
+        </li>
+
+        <li class="divider" ng-if="$ctrl.showTemporalOptions()"></li>
+        <li class="criteria-list-item" ng-if="$ctrl.showTemporalOptions()">
+          <select class="form-control input-sm form-select" ng-model="$ctrl.selectedTemporalOperation">
+            <option value="range">{{'analysis.range' | translate}}</option>
+            <option value="in">{{'analysis.value' | translate}}</option>
+          </select>
+        </li>
+        <li class="criteria-list-item" ng-if="$ctrl.showTemporalOptions() && $ctrl.selectedTemporalOperation === 'range'">
+          <div class="row">
+            <div class="col-xs-6">
+              <div class="form-group">
+                <label for="from-date" class="control-label" translate>analysis.to</label>  
+                <span class="input-group input-group-sm no-padding-top">
+                  <input id="from-date" type="text" class="form-control" aria-describedby="from-date-picker" uib-datepicker-popup="yyyy-MM-dd" 
+                    ng-model="$ctrl.selectedFrom" is-open="$ctrl.fromDatePickerOpened"/>
+                  <span class="input-group-addon" id="from-date-picker" ng-click="$ctrl.fromDatePickerOpened = true"><i class="fa fa-calendar"></i></span>
+                </span>
+              </div>
+            </div>
+            <div class="col-xs-6">
+              <div class="form-group">
+                <label for="to-date" class="control-label" translate>analysis.to</label>  
+                <span class="input-group input-group-sm no-padding-top">
+                  <input id="to-date" type="text" class="form-control" aria-describedby="to-date-picker" uib-datepicker-popup="yyyy-MM-dd" 
+                    ng-model="$ctrl.selectedTo" is-open="$ctrl.toDatePickerOpened"/>
+                  <span class="input-group-addon" id="to-date-picker" ng-click="$ctrl.toDatePickerOpened = true"><i class="fa fa-calendar"></i></span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="criteria-list-item" ng-if="$ctrl.showTemporalOptions() && $ctrl.selectedTemporalOperation === 'in'">
+          <div class="row">
+            <div class="col-xs-12">
+              <div class="form-group">
+                <label for="in-date" class="control-label" translate>analysis.date-title</label>  
+                <span class="input-group input-group-sm no-padding-top">
+                  <input id="in-date" type="text" class="form-control" aria-describedby="date-picker" uib-datepicker-popup="yyyy-MM-dd" 
+                    ng-model="$ctrl.selectedTemporalValue" is-open="$ctrl.datePickerOpened"/>
+                  <span class="input-group-addon" id="date-picker" ng-click="$ctrl.datePickerOpened = true"><i class="fa fa-calendar"></i></span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </li>
+    </ul>
+
+  </div>
+
+</div>

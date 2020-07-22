@@ -1,0 +1,25 @@
+<div>
+  <div class="alert alert-warning" ng-if="!isSearchAvailable">
+    <span translate>search.search-not-available</span>
+  </div>
+  <div ng-if="isSearchAvailable">
+    <div class="container alert-fixed-position">
+      <obiba-alert id="SearchController"></obiba-alert>
+    </div>
+
+    <div class="alert-growl-container">
+      <obiba-alert id="SearchControllerGrowl"></obiba-alert>
+    </div>
+
+    <div ng-if="searchHeaderTemplateUrl" ng-include="searchHeaderTemplateUrl"></div>
+
+    <div ng-switch on="search.layout">
+      <div ng-switch-when="layout1">
+        <ng-include src="'search/views/search.html'"></ng-include>
+      </div>
+      <div ng-switch-default>
+        <ng-include src="'search/views/search2.html'"></ng-include>
+      </div>
+    </div>
+  </div>
+</div>

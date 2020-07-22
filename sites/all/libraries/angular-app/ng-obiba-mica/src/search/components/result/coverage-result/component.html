@@ -1,0 +1,186 @@
+<div class="coverage">
+  <div ng-if="hasVariableTarget() && table.taxonomyHeaders">
+    <ul class="nav nav-pills pull-left">
+      <li ng-if="groupByOptions.canShowStudy() && groupByOptions.canShowDataset()" ng-class="{'active': bucket.startsWith('study') || bucketStartsWithDce}"
+        class="studies">
+        <a href ng-click="selectTab('study')" translate>{{groupByOptions.studyTitle()}}</a>
+      </li>
+      <li ng-if="groupByOptions.canShowStudy() && groupByOptions.canShowDataset()" ng-class="{'active': bucket.startsWith('dataset')}"
+        class="datasets">
+        <a href ng-click="selectTab('dataset')" translate>{{groupByOptions.datasetTitle()}}</a>
+      </li>
+    </ul>
+
+    <div ng-class="{'pull-right': groupByOptions.canShowStudy() && groupByOptions.canShowDataset()}">
+      <div ng-if="table.taxonomyHeaders.length > 0">
+        <a ng-if="hasSelected()" href class="btn btn-default" ng-click="updateFilterCriteria()">
+          <i class="fa fa-filter"></i> {{'search.apply-selections' | translate}}
+        </a>
+
+        <div class="btn-group">
+          <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
+            <span><i class="fa fa-filter"></i> {{'search.filter' | translate}} <i class="fa fa-caret-down"></i></span>
+          </button>
+
+          <ul class="dropdown-menu">
+            <li>
+              <a ng-click="onZeroColumnsToggle()" href >{{coverage.withZeros ? 'search.coverage-without-zeros' : 'search.coverage-with-zeros' | translate}}</a>
+            </li>
+            <li>
+              <a href ng-click="selectFullAndFilter()" ng-hide="fullCoverageDisabled">
+                {{'search.coverage-select.full' | translate}}
+              </a>
+            </li>
+          </ul>
+        </div>
+        <span>
+          <a obiba-file-download url="downloadUrl()" target="_self" download class="btn btn-info btn-responsive" href>
+            <i class="fa fa-download"></i> {{'download' | translate}}
+          </a>
+        </span>
+      </div>
+
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div class="voffset2" ng-class="{'pull-right': groupByOptions.canShowVariableTypeFilter(bucket) && groupByOptions.canShowStudyType()}" ng-if="!singleStudy && groupByOptions.canShowDce(bucket)">
+      <label class="checkbox-inline">
+        <input type="checkbox" ng-model="bucketSelection.dceBucketSelected">
+        <span translate>search.coverage-buckets.dce</span>
+      </label>
+    </div>
+
+    <div class="voffset2" ng-if="!singleStudy && groupByOptions.canShowStudyType()">
+      <div class="btn btn-group" style="padding: 0">
+        <label class="btn btn-sm btn-study" ng-model="bucketSelection.studySelection" uib-btn-radio="'all'" translate>all</label>
+        <label class="btn btn-sm btn-study" ng-model="bucketSelection.studySelection" uib-btn-radio="'individual'" translate>search.coverage-buckets.individual</label>
+        <label class="btn btn-sm btn-study" ng-model="bucketSelection.studySelection" uib-btn-radio="'harmonization'" translate>search.coverage-buckets.harmonization</label>
+      </div>
+    </div>
+  </div>
+
+  <p class="help-block" ng-if="!loading && !table.taxonomyHeaders">
+    <span ng-if="!hasVariableTarget() || !table.taxonomyHeaders" translate>search.no-coverage</span>
+    <span ng-if="hasVariableTarget()" translate>search.no-results</span>
+  </p>
+
+  <div ng-if="loading" class="loading"></div>
+
+  <div id="coverage-table-container" class="table-responsive table-scroll" ng-if="!loading && table.taxonomyHeaders.length > 0">
+    <coverage-row-popup state="rowPopupState"></coverage-row-popup>
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th rowspan="2" width="50" style="text-align: center">
+            <div class="btn-group voffset1" uib-dropdown>
+              <div uib-dropdown-toggle>
+                <span class="fa fa-square-o"></span>
+                <span class="fa fa-caret-down"></span>
+              </div>
+              <ul uib-dropdown-menu role="menu">
+                <li role="menuitem">
+                  <a href ng-click="selectAll()" translate>search.coverage-select.all</a>
+                </li>
+                <li role="menuitem">
+                  <a href ng-click="selectNone()" translate>search.coverage-select.none</a>
+                </li>
+                <li ng-hide="fullCoverageDisabled" role="menuitem">
+                  <a href ng-click="selectFull()" translate>search.coverage-select.full</a>
+                </li>
+              </ul>
+            </div>
+          </th>
+          <th rowspan="{{bucketStartsWithDce ? 1 : 2}}" colspan="{{table.cols.colSpan}}" translate>
+            {{'search.coverage-buckets.' + bucket}}
+          </th>
+          <th ng-repeat="header in ::table.vocabularyHeaders" colspan="{{::header.termsCount}}">
+            <span uib-popover="{{header.entity.descriptions[0].value}}" popover-title="{{header.entity.titles[0].value}}" popover-placement="bottom"
+              popover-trigger="'mouseenter'">
+              {{header.entity.titles[0].value}}
+            </span>
+            <small>
+              <a href ng-click="removeVocabulary(header)">
+                <i class="fa fa-times"></i>
+              </a>
+            </small>
+          </th>
+        </tr>
+        <tr>
+          <th ng-if="bucketStartsWithDce && !singleStudy" translate>search.coverage-dce-cols.study</th>
+          <th ng-if="bucketStartsWithDce" colspan="{{choseHarmonization && !choseAll ? 2 : 1}}" translate>search.coverage-dce-cols.population</th>
+          <th ng-if="bucketStartsWithDce" ng-hide="choseHarmonization && !choseAll" translate>search.coverage-dce-cols.dce</th>
+          <th ng-repeat="header in ::table.termHeaders">
+            <span uib-popover="{{header.entity.descriptions[0].value}}" popover-title="{{header.entity.titles[0].value}}" popover-placement="bottom"
+              popover-trigger="'mouseenter'">
+              {{header.entity.titles[0].value}}
+            </span>
+            <small>
+              <a ng-if="header.canRemove" href ng-click="removeTerm(header)">
+                <i class="fa fa-times"></i>
+              </a>
+            </small>
+          </th>
+        </tr>
+        <tr ng-show="totalOptions.showInHeader">
+          <th></th>
+          <th colspan="{{table.cols.colSpan}}"></th>
+          <th ng-repeat="header in ::table.termHeaders" title="{{header.entity.descriptions[0].value}}">
+            <a href ng-click="updateCriteria(null, header, $index, 'variables')">
+              <localized-number value="header.hits"></localized-number>
+            </a>
+          </th>
+          </tr>
+      </thead>
+      <tbody class="infinite-scroll" load=loadMoreRows()>
+        <tr ng-repeat="row in filteredRows track by row.value" ng-show="showMissing || table.termHeaders.length == row.hits.length"
+            ng-mouseover="onRowMouseOver($event, row)"
+            ng-mouseleave="onRowMouseLeave($event, row)">
+          <td style="text-align: center">
+            <input type="checkbox" ng-model="row.selected">
+          </td>
+          <td ng-repeat="col in ::table.cols.ids[row.value] track by col.index" colspan="{{$middle && (choseHarmonization && !choseAll) ? 2 : 1}}" ng-hide="col.id === '-' && (singleStudy || choseHarmonization && !choseAll)">
+            <span ng-if="col.id === '-'">-</span>
+            <a ng-hide="col.rowSpan === 0  || col.id === '-'" href="{{col.url}}" uib-popover-html="col.description === col.title ? null : col.description"
+              popover-title="{{col.title}}" popover-placement="bottom" popover-trigger="'mouseenter'">{{col.title}}</a>
+            <div style="text-align: center" ng-if="col.start && bucketStartsWithDce">
+              <div>
+                <small class="help-block no-margin" ng-if="::col.end">
+                  {{::col.start}} {{'to' | translate}} {{::col.end}}
+                </small>
+                <small class="help-block no-margin" ng-if="!col.end">
+                  {{::col.start}}, {{'search.coverage-end-date-ongoing' | translate | lowercase}}
+                </small>
+              </div>
+              <div class="progress no-margin">
+                <div class="progress-bar progress-bar-transparent" role="progressbar" aria-valuenow="{{::col.start}}" aria-valuemin="{{::col.min}}"
+                  aria-valuemax="{{::col.start}}" ng-style="{'width': col.progressStart + '%'}">
+                </div>
+                <div class="{{'progress-bar progress-bar-' + col.progressClass}}" role="progressbar" aria-valuenow="{{col.current}}" aria-valuemin="{{::col.start}}"
+                  aria-valuemax="{{::col.end ? col.end : col.current}}" ng-style="{'width': col.progress + '%'}">
+                </div>
+              </div>
+            </div>
+          </td>
+          <td ng-repeat="h in ::table.termHeaders">
+            <a href ng-click="updateCriteria(row.value, h, $index, 'variables')">
+              <span class="label label-info" ng-show="row.hitsTitles[$index]">{{row.hitsTitles[$index]}}</span>
+            </a>
+            <span ng-show="!row.hitsTitles[$index]">0</span>
+          </td>
+        </tr>
+      </tbody>
+      <tfoot ng-show="totalOptions.showInFooter">
+        <tr>
+          <th></th>
+          <th colspan="{{table.cols.colSpan}}" translate>all</th>
+          <th ng-repeat="header in ::table.termHeaders" title="{{header.entity.descriptions[0].value}}">
+            <a href ng-click="updateCriteria(null, header, $index, 'variables')">
+              <localized-number value="header.hits"></localized-number>
+            </a>
+          </th>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>

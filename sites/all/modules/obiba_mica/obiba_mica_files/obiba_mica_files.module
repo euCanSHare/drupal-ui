@@ -1,0 +1,123 @@
+<?php
+/**
+ * Copyright (c) 2018 OBiBa. All rights reserved.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * @file
+ * Mica files module file
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function obiba_mica_files_menu() {
+
+  $items['admin/config/obiba-mica/obiba-mica-files-settings'] = array(
+    'title' => 'Files settings',
+    'description' => 'Configure files pages.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('obiba_mica_files_admin_settings'),
+    'access arguments' => array('administer obiba mica'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'obiba_mica_files.admin.inc',
+    'weight' => 3,
+  );
+
+  $items['download/%/%/%'] = array(
+    'page callback' => 'obiba_mica_files_download_attachment',
+    'file' => 'obiba_mica_files_services.inc',
+    'access callback' => TRUE,
+    'page arguments' => array(1, 2, 3),
+    'type' => MENU_CALLBACK
+  );
+  
+  $items['mica/file'] = array(
+    'page callback' => 'obiba_mica_files_get_file',
+    'file' => 'obiba_mica_files_services.inc',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK
+  );
+
+  $items['mica/files/search'] = array(
+    'page callback' => 'obiba_mica_files_search_files',
+    'file' => 'obiba_mica_files_services.inc',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK
+  );
+  
+  $items['mica/file/download'] = array(
+    'page callback' => 'obiba_mica_file_download',
+    'file' => 'obiba_mica_files_services.inc',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK
+  );
+
+  return $items;
+}
+
+/**
+ *Implements hook_theme().
+ *
+ * copy '<modules>/obiba_mica_study/templates/'   files in  yor customized
+ * theme  '<YOUR_THEME>/templates/' path you can modify default display of
+ * listed page templates by rearrange block field for example don't forget to
+ * clear the theme registry.
+ */
+function obiba_mica_files_theme($existing, $type, $theme, $path) {
+  $path_views_theme = $path . '/js/app/views';
+  return array(
+    'obiba_mica_files_browser' => array(
+      'template' => 'obiba_mica_files_browser',
+      'path' => $path_views_theme
+    ),
+  );
+}
+
+
+/**
+ * Implements hook_get_js().
+ */
+function obiba_mica_files_get_js($weight_js) {
+  $module_path = drupal_get_path('module', 'obiba_mica_files');
+  drupal_add_js($module_path . '/js/obiba_mica_files_attachment_download.js');
+  drupal_add_js(array(
+    'documentsTitle' => variable_get_value('files_documents_label')
+  ), 'setting');
+  $js = file_scan_directory($module_path . '/js/app', '/.*\.js$/', array('key' => 'name'));
+  ksort($js);
+  foreach ($js as $file_js) {
+    drupal_add_js($file_js->uri, array(
+      'type' => 'file',
+      'scope' => 'footer',
+      'weight' => ++$weight_js
+    ));
+  }
+  return $weight_js;
+}
+
+/**
+ * Implements hook_get_ng_module_to_load().
+ */
+function obiba_mica_files_get_ng_module_to_load() {
+  return 'mica.fileBrowser';
+}
+/**
+ * Get flat list attachments.
+ *
+ * @param $path
+ *  study/network/population/data-collection-event/dataset. + id
+ * @return array
+ */
+function obiba_mica_files_get_flat_attachments($path, $token_key = NULL) {
+  $files_resources = new DrupalMicaFilesResource();
+  $flat_attachments = json_decode($files_resources->getFile($path, $token_key));
+  $has_files = $files_resources->hasFiles($flat_attachments);
+  return $has_files;
+}

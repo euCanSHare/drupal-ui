@@ -1,0 +1,38 @@
+<div class="modal-header">
+  <h4 class="modal-title">
+    {{'data-access-request.action-log.edit.title' | translate}}
+  </h4>
+</div>
+
+<div class="modal-body">
+  <form name="actionLogModalForm">
+    <div class="form-group">
+      <input type="text"
+             class="form-control"
+             ng-model="$modal.item.action"
+             ng-required="true"
+             placeholder="{{'data-access-request.action-log.action-placeholder' | translate}}"
+             typeahead-editable="true"
+             uib-typeahead="value for value in $modal.predefinedActionNames | filter:$viewValue | limitTo:8">
+    </div>
+
+    <div class="form-group">
+      <div class="input-group">
+        <input type="datetime" class="form-control" uib-datepicker-popup="dd/MM/yyyy" ng-model="$modal.item.changedOn" ng-required="true"
+          ng-focus="$modal.open = !$modal.item.changedOn" is-open="$modal.open" placeholder="dd/MM/yyyy" show-button-bar="false">
+
+        <span class="input-group-btn">
+          <button type="button" class="btn btn-sm btn-default" ng-click="$modal.open = !$modal.open">
+            <i class="glyphicon glyphicon-calendar"></i>
+          </button>
+        </span>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="modal-footer">
+  <button class="btn btn-responsive btn-default" type="button" ng-click="$dismiss()" translate>cancel</button>
+  <button class="btn btn-responsive btn-primary" type="button" ng-disabled="!$modal.item.action || !$modal.item.changedOn"
+    ng-click="$close($modal.item)" translate>ok</button>
+</div>

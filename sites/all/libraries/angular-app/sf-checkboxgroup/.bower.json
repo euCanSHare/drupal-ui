@@ -1,0 +1,39 @@
+{
+  "name": "sf-checkboxgroup",
+  "version": "1.0.1",
+  "license": "MIT",
+  "author": "obiba",
+  "main": [
+    "dist/sf-checkboxgroup.min.js"
+  ],
+  "keywords": [
+    "angular-schema-form",
+    "schema-form",
+    "form",
+    "json",
+    "json-schema",
+    "schema"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "angular-schema-form": "^0.8.13",
+    "angular-schema-form-bootstrap": "^0.2.0",
+    "bootstrap": "^3.3.6"
+  },
+  "homepage": "https://github.com/obiba/sf-checkboxgroup",
+  "_release": "1.0.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "1.0.1",
+    "commit": "63b76c9f4a0f463810bbcaf4a0572a18bab53934"
+  },
+  "_source": "https://github.com/obiba/sf-checkboxgroup.git",
+  "_target": "1.0.1",
+  "_originalSource": "https://github.com/obiba/sf-checkboxgroup.git"
+}

@@ -1,0 +1,14 @@
+<div id="search-criteria-region" ng-class="options.showSearchBox || options.showSearchBrowser ? 'voffset2' : ''" class="panel panel-default" ng-if="search.criteria.children && search.criteria.children.length>0 && canShowCriteriaRegion()">
+    <div class="panel-body">
+        <table style="border:none">
+            <tbody>
+            <tr >
+                <td style="padding-left: 10px">
+                    <div criteria-root item="search.criteria"  on-remove="removeCriteriaItem"
+                         on-refresh="refreshQuery" query="search.query" class="inline"></div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

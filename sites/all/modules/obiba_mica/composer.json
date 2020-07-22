@@ -1,0 +1,11 @@
+{
+  "require": {
+    "erusev/parsedown": "^1.5",
+    "flow/jsonpath": "0.3.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "Obiba\\ObibaMicaClient\\": "includes/"
+    }
+  }
+}

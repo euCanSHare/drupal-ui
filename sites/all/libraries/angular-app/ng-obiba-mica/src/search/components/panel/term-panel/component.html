@@ -1,0 +1,21 @@
+<div>
+  <div class="panel panel-default" ng-if="term">
+    <div class="panel-heading">
+      <div>
+        <localized value="term.title" lang="lang" key-lang="locale" key-value="text"></localized>
+        {{label.text}}
+        <small>
+          <a href ng-click="onSelect(target, taxonomy, vocabulary, {term: term})">
+            <i class="fa fa-plus-circle" title="{{'add-query' | translate}}"></i>
+          </a>
+        </small>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div>
+        <localized value="term.description" lang="lang" key-lang="locale" key-value="text"></localized>
+      </div>
+      <div ng-if="!term.description" class="help-block" translate>search.no-description</div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,30 @@
+{
+  "name": "obiba-shims",
+  "version": "1.0.0",
+  "license": "MIT",
+  "author": "OBiBa",
+  "main": [
+    "dist/obiba-shims.min.js"
+  ],
+  "keywords": [
+    "compatibility",
+    "shim",
+    "ms",
+    "browser",
+    "Internet Explorer"
+
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "es6-shim": "^0.35.3"
+  },
+  "dev-dependencies": {
+    "angular": "1.5.8"
+  }
+}

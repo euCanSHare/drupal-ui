@@ -1,0 +1,51 @@
+<div id="search-criteria-region" ng-class="options.showSearchBox || options.showSearchBrowser ? 'voffset2' : ''" class="panel panel-default"
+  ng-if="renderableTargets && renderableTargets.length > 0">
+  <div class="panel-body">
+    <table style="border:none">
+      <tbody>
+        <tr>
+          <td>
+            <a href class="btn btn-sm btn-default" ng-click="clearSearchQuery()" translate>clear</a>
+          </td>
+          <td style="padding-left: 10px">
+            <div criteria-root item="search.criteria" query="search.query" advanced="search.advanced" on-remove="removeCriteriaItem"
+              on-refresh="refreshQuery" class="inline"></div>
+
+            <small class="hoffset2" ng-if="showAdvanced()">
+              <a href ng-click="toggleSearchQuery()" title="{{search.advanced ? 'search.basic-help' : 'search.advanced-help' | translate}}"
+                translate>
+                {{search.advanced ? 'search.basic' : 'search.advanced' | translate}}
+              </a>
+            </small>
+
+            <div ng-show="options.showCopyQuery" class="btn-group voffset1 hoffset2" uib-dropdown auto-close="outsideClick" is-open="status.isopen">
+              <button id="single-button" type="button" class="btn btn-xs btn-success" uib-dropdown-toggle ng-disabled="disabled">
+                {{'global.copy-query' | translate}}
+                <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu query-dropdown-menu criteria-list-item" uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                <li role="menuitem">
+                  <div class="form-group">
+                    <label class="control-label" translate>search.query</label>
+                    <div class="input-group">
+                      <input id="copyQuery" type="text" class="form-control" value="{{$parent.query}}" tooltip-is-open="$parent.showCopiedQueryTooltipStatus"
+                        uib-tooltip="{{'global.copied' | translate}}" tooltip-trigger="'none'" />
+                      <span class="input-group-btn">
+                        <button class="btn" ng-click="$parent.showCopiedQueryTooltip()" ngclipboard data-clipboard-target="#copyQuery" uib-tooltip="{{'global.copy-to-clipboard' | translate}}">
+                          <span class="fa fa-copy" alt="Copy to clipboard" />
+                        </button>
+                      </span>
+                    </div>
+                    <small>
+                      <span class="help-block" translate>search.query-copy-help</span>
+                    </small>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

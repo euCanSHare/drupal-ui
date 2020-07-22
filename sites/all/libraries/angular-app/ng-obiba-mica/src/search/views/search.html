@@ -1,0 +1,75 @@
+<!--
+  ~ Copyright (c) 2018 OBiBa. All rights reserved.
+  ~
+  ~ This program and the accompanying materials
+  ~ are made available under the terms of the GNU Public License v3.0.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<div ng-show="inSearchMode()">
+  <div class="row voffset2">
+    <div class="col-md-3" ng-if="hasFacetedTaxonomies" >
+      <!-- Search Facets region -->
+      <taxonomies-facets-panel id="search-facets-region"
+                               faceted-taxonomies="facetedTaxonomies"
+                               criteria="search.criteria"
+                               on-select-term="onSelectTerm"
+                               on-refresh="refreshQuery"
+                               lang="lang"></taxonomies-facets-panel>
+    </div>
+    <div class="{{hasFacetedTaxonomies ? 'col-md-9' : 'col-md-12'}}">
+      <search-box-region
+        targets="targetTabsOrder"
+        options="options"
+        alert-id="'SearchController'"
+        lang="lang"
+        taxonomy-nav="taxonomyNav"
+        on-select-criteria="selectCriteria(item)"
+        on-goto-classifications="goToClassifications()",
+        on-select-term="onSelectTerm(target, taxonomy, vocabulary, args)">
+      </search-box-region>
+
+      <div ng-if="hasFacetedTaxonomies && hasFacetedNavigationHelp && !(search.criteria.children && search.criteria.children.length > 0)">
+        <p class="help-block" translate>search.faceted-navigation-help</p>
+      </div>
+
+      <!-- Search criteria region -->
+      <search-criteria-region options="options" search="search"> </search-criteria-region>
+
+      <!-- Search Results region -->
+      <div id="search-result-region" class="voffset3 can-full-screen" ng-if="canExecuteWithEmptyQuery()" fullscreen="isFullscreen">
+        <div ng-if="searchTabsOrder.length > 1">
+          <a href class="btn btn-sm btn-default pull-right" ng-click="toggleFullscreen()">
+            <i class="glyphicon" ng-class="{'glyphicon-resize-full': !isFullscreen, 'glyphicon-resize-small': isFullscreen}"></i>
+          </a>
+          <ul class="nav nav-tabs voffset2">
+            <li role="presentation" ng-repeat="tab in searchTabsOrder" ng-class="{active: search.display === tab}">
+              <a href ng-click="selectDisplay(tab)">{{ 'search.' + tab | translate}}</a>
+            </li>
+          </ul>
+        </div>
+        <div translate>{{'search.' + search.display + '-help'}}</div>
+        <result-panel display="search.display"
+                      type="search.type"
+                      bucket="search.bucket"
+                      criteria="search.criteria"
+                      query="search.executedQuery"
+                      result="search.result"
+                      loading="search.loading"
+                      pagination="search.pagination"
+                      on-update-criteria="onUpdateCriteria"
+                      on-remove-criteria="onRemoveCriteria"
+                      on-type-changed="onTypeChanged"
+                      on-bucket-changed="onBucketChanged"
+                      on-paginate="onPaginate"
+                      search-tabs-order="searchTabsOrder"
+                      result-tabs-order="resultTabsOrder"
+                      lang="lang"></result-panel>
+      </div>
+
+    </div>
+  </div>
+
+</div>

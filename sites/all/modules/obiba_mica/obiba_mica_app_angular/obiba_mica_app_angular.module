@@ -1,0 +1,634 @@
+<?php
+/**
+ * Copyright (c) 2018 OBiBa. All rights reserved.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+use Obiba\ObibaMicaClient\MicaClient\DrupalMicaClient\MicaClientConfigResource as MicaClientConfigResource;
+
+const TARGET_STUDY = 'study';
+const TARGET_NETWORK = 'network';
+const TARGET_DATASET = 'dataset';
+const TARGET_VARIABLE = 'variable';
+
+/**
+ * Implements hook_menu().
+ */
+function obiba_mica_app_angular_menu() {
+  $items = array();
+
+  $items['obiba-angular-app'] = array(
+    'page callback' => 'obiba_mica_app_angular_main_page',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK
+  );
+
+  $items['obiba_mica_app_angular_view_template/%'] = array(
+    'page callback' => 'obiba_mica_app_angular_get_angular_template',
+    'access callback' => TRUE,
+    'page arguments' => array(1),
+    'type' => MENU_CALLBACK
+  );
+  $items['obiba_mica_app_angular/translation/%'] = array(
+    'page callback' => 'obiba_mica_app_angular_get_angular_translation',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK
+  );
+  $items['un-authorized-error'] = array(
+    'page callback' => 'obiba_mica_app_angular_set_drupal_message_error',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function obiba_mica_app_angular_menu_alter(&$items) {
+  $external_items = array();
+  $external_items += obiba_mica_app_angular_load_external_menus_definitions();
+
+  foreach ($external_items as $key_item => $external_item) {
+    $external_items[$key_item]['page callback']
+      = 'obiba_mica_app_angular_main_page';
+    if (!empty($external_item['module_caller'])) {
+      $external_items[$key_item]['page arguments']
+        = array($external_item['module_caller']);
+    }
+    if(!empty($external_item['node_page'])){
+      $external_items[$key_item]['page arguments'][] = $external_item['node_page'];
+    }
+  }
+  $items += $external_items;
+}
+/**
+ * Implements hook_library().
+ */
+function obiba_mica_app_angular_library() {
+  return obiba_mica_app_angular_load_angular_library();
+}
+
+/**
+ * Implements hook_theme().
+ */
+function obiba_mica_app_angular_theme($existing, $type, $theme, $path) {
+  $path_theme = $path . '/templates';
+  $path_view_template = $path . '/js/app/views';
+  return array(
+    'obiba_angular_main' => array(
+      'template' => 'obiba_angular_main',
+      'path' => $path_theme,
+    ),
+    'obiba_mica_app_angular_attachment-input-template' => array(
+      'template' => 'obiba_mica_app_angular_attachment-input-template',
+      'path' => $path_view_template,
+    ),
+    'obiba_mica_app_angular_attachment-list-template' => array(
+      'template' => 'obiba_mica_app_angular_attachment-list-template',
+      'path' => $path_view_template,
+    ),
+  );
+}
+
+/**
+ * Hook implementation to load the menus rooting of external angular js modules.
+ *
+ * @return array
+ *   An array of path menu loaded on different hook_load_menus() implementation.
+ */
+function obiba_mica_app_angular_load_external_menus_definitions() {
+  $external_items = array();
+  foreach (module_implements('load_menus') as $module) {
+    $external_loaded_menu = module_invoke($module, 'load_menus');
+    if (!empty($external_loaded_menu)) {
+      $external_items += $external_loaded_menu;
+    }
+
+  }
+  return $external_items;
+}
+
+/**
+ * Hook implementation to load external angular app js.
+ */
+function obiba_mica_app_angular_load_external_app_js($module_caller = NULL, $weight_js = NULL) {
+  return module_invoke_all('get_js', $weight_js);
+}
+
+/**
+ * Hook implementation to get external modules names to load.
+ *
+ * @return string
+ *   The module name to load on the AngularJs main app in each Drupal module
+ *   that use obiba_mica_app_angular module.
+ */
+function obiba_mica_app_angular_load_ng_module($module_caller) {
+  return array_filter(module_invoke_all('get_ng_module_to_load'));
+}
+
+/**
+ * Load Js resources by folder name.
+ *
+ * Useful to add some custom AngularJs module.
+ */
+function obiba_mica_app_angular_load_js_by_folder_app($folder = 'app', $weight_js = 10) {
+  $module_path = drupal_get_path('module', 'obiba_mica_app_angular');
+  $js = file_scan_directory($module_path . '/js/' . $folder, '/.*\.js$/',
+    array('key' => 'name'));
+
+  ksort($js);
+  foreach ($js as $file_js) {
+    drupal_add_js($file_js->uri, array(
+      'type' => 'file',
+      'scope' => 'footer',
+      'weight' => ++$weight_js
+    ));
+  }
+  return $weight_js;
+}
+
+/**
+ * Load Js resources.
+ */
+function obiba_mica_app_angular_load_js_resources($module_caller = NULL) {
+  obiba_mica_app_angular_load_libraries_resources('obiba_mica_app_angular');
+  $weight_js = obiba_mica_app_angular_load_js_by_folder_app('app');
+  $weight_js = obiba_mica_app_angular_load_js_by_folder_app('http-auth-interceptor');
+  $weight_js = obiba_mica_app_angular_load_js_by_folder_app('attachment', $weight_js);
+  $weight_js = obiba_mica_app_angular_load_js_by_folder_app('file', $weight_js);
+  obiba_mica_app_angular_load_external_app_js($module_caller, $weight_js);
+  global $user, $language;
+  // TODO Add CSRF token required by restWS.
+  $authenticated = user_is_logged_in();
+  if (module_exists('obiba_agate')) {
+    $authenticated = ObibaAgateClient::hasTicket() || user_is_logged_in();
+  }
+
+  $micaConfig = (new MicaClientConfigResource())->getAllConfig();
+
+  $js_settings = array(
+    'angularjsApp' => array(
+      'modules' => obiba_mica_app_angular_load_ng_module($module_caller),
+      'requests_url' => MicaClientPathProvider::DATA_ACCESS_LIST,
+      'authenticated' => $authenticated,
+        'agate_user' => user_external_load(empty($user->name) ? "" : $user->name),
+      /*  'restws_csrf_token' => drupal_get_token('restws'), */
+      'user' => $user,
+      'locale' => $language->language,
+      'show_detailed_stats' => variable_get_value('dataset_detailed_var_stats'),
+      'data_access_config' => obiba_mica_app_angular_get_access_config(),
+      'analysis_config' => obiba_mica_app_angular_get_analysis_config(),
+      'sets_config' => obiba_mica_app_angular_get_sets_config(),
+      'obibaSearchOptions' => obiba_mica_app_angular_get_search_config(),
+      'micaServerConfig' => empty($micaConfig) ? array() : $micaConfig
+    ),
+  );
+
+  drupal_add_js($js_settings, 'setting');
+}
+
+/**
+ * Load resource + template main app.
+ *
+ * @return string
+ *   The template of the main angular app.
+ */
+function obiba_mica_app_angular_load_template_app($module_caller = NULL, $node_page_id = NULL) {
+  $node_rendered = NULL;
+  obiba_mica_app_angular_load_js_resources($module_caller);
+  if(!empty($node_page_id)){
+    $node_rendered = obiba_mica_commons_get_translated_node($node_page_id);
+    if (!empty($node_rendered)) {
+      drupal_set_title($node_rendered['#node']->title);
+      $node_rendered['#node']->title = '';
+    }
+  }
+  return theme('obiba_angular_main',
+    array(
+      'node_page' => $node_rendered,
+      'module_caller' => $module_caller ? $module_caller : NULL
+      ));
+}
+
+/**
+ * Callback for the main page app.
+ *
+ * @return string
+ *   The template of the AngularJs app.
+ */
+function obiba_mica_app_angular_main_page($module_caller = NULL, $node_page = NULL) {
+  $current_menu_item = menu_get_item(current_path());
+  if (!empty($current_menu_item['title'])) {
+    drupal_set_title($current_menu_item['title']);
+  }
+  $page_node = !empty($node_page) ? $node_page : (!empty($module_caller) ? variable_get($module_caller . '_page') : NULL);
+  return obiba_mica_app_angular_load_template_app($module_caller, $page_node);
+}
+
+/**
+ * Callback for a service that return  the app template.
+ *
+ * @return string
+ *   The template of the AngularJs app.
+ */
+function obiba_mica_app_angular_get_angular_template($angular_template_key) {
+  global $language;
+  $cached_template = obiba_mica_commons_get_cache('angular-template-cache-' . $angular_template_key);
+  if (!empty($cached_template)) {
+    print  $cached_template;
+  }
+  else {
+    $angular_template = theme($angular_template_key, array('locale_language' => $language->language));
+    obiba_mica_commons_set_cache('angular-template-cache-' . $angular_template_key, $angular_template);
+    print $angular_template;
+  }
+}
+
+/**
+ * Callback for service that return translations to angularJs translate module.
+ *
+ * @return string
+ *   The translation string of the AngularJs app.
+ */
+function obiba_mica_app_angular_get_angular_translation($lang) {
+    $mica_config = new DrupalMicaConfigResource();
+    $translation = $mica_config->micaClientConfigResource->getTranslations($lang);
+    drupal_json_output(json_decode($translation));
+}
+
+/**
+ * Implements hook_Library().
+ */
+function obiba_mica_app_angular_load_angular_library() {
+  $libraries = array();
+  $lib_path = libraries_get_path('angular-app');
+  // Make sure we have a valid library path before returning library load info.
+  if (!empty($lib_path)) {
+    $libraries['angular-app'] = array(
+      'title' => 'Angular Js + dependencies',
+      'website' => 'https://angularjs.org',
+      'version' => 'Last Version',
+      'js' => array(
+        $lib_path . '/es6-shim/es6-shim.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/angular/angular.min.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/obiba-shims/dist/obiba-shims.min.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path
+        . '/angular-resource/angular-resource.min.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path
+        . '/angular-bootstrap/ui-bootstrap-tpls.min.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path
+        . '/angular-cookies/angular-cookies.min.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path
+        . '/angular-sanitize/angular-sanitize.min.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/ng-obiba/dist/ng-obiba.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/ng-obiba-mica/dist/ng-obiba-mica.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/tv4/tv4.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/objectpath/lib/ObjectPath.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path
+        . '/angular-schema-form/dist/schema-form.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path
+        . '/angular-schema-form-bootstrap/bootstrap-decorator.min.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/angular-route/angular-route.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/angular-translate/angular-translate.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/angular-translate-loader-url/angular-translate-loader-url.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/marked/lib/marked.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/angular-marked/dist/angular-marked.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/moment/moment.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/moment/min/locales.min.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/angular-moment/angular-moment.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/angular-strap/dist/angular-strap.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/rql-nodojo/js/rql.min.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path
+        . '/angular-strap/dist/angular-strap.tpl.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path
+        . '/angular-schema-form-datetimepicker/schema-form-date-time-picker.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path
+        . '/angular-schema-form-bootstrap/bootstrap-decorator.min.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/filesize/lib/filesize.min.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/clipboard/dist/clipboard.min.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/ngclipboard/dist/ngclipboard.min.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path
+        . '/ng-file-upload/ng-file-upload-all.min.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path
+        . '/angular-recaptcha/release/angular-recaptcha.min.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/angular-local-storage/dist/angular-local-storage.min.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/angular-utils-pagination/dirPagination.js'
+        => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/angular-ui-select/dist/select.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/sf-obiba-file-upload/dist/sf-obiba-file-upload.min.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/sf-checkboxgroup/dist/sf-checkboxgroup.min.js' => array(
+          'type' => 'file',
+          'scope' => 'footer'
+        ),
+        $lib_path . '/sf-radio-group-collection/dist/sf-radio-group-collection.js' => array(
+          'type' => 'file',
+          'scope' => 'footer',
+        ),
+        $lib_path . '/d3/d3.js' => array(
+          'type' => 'file',
+          'scope' => 'footer'
+        ),
+        $lib_path . '/nvd3/build/nv.d3.js' => array(
+          'type' => 'file',
+          'scope' => 'footer'
+        ),
+        $lib_path . '/angular-nvd3/dist/angular-nvd3.js' => array(
+          'type' => 'file',
+          'scope' => 'footer'
+        )
+      ),
+      'css' => array(
+        $lib_path . '/ng-obiba/dist/css/ng-obiba.css' => array(),
+        $lib_path . '/ng-obiba-mica/dist/css/ng-obiba-mica.css' => array(),
+        $lib_path . '/angular-ui-select/dist/select.css' => array(),
+        $lib_path . '/nvd3/build/nv.d3.css' => array(),
+      ),
+    );
+  }
+  return $libraries;
+}
+
+/**
+ * Add angular-app library to a given module.
+ *
+ * @param string $module_name
+ *   The module name to attach angular-app library.
+ */
+function obiba_mica_app_angular_load_libraries_resources($module_name) {
+  if (drupal_get_library($module_name, 'angular-app')) {
+    drupal_add_library($module_name, 'angular-app');
+  }
+  else {
+    watchdog('Mica Client' , 'The library of %module_name module angular-app not loaded', array(
+      '%module_name' => $module_name
+    ),
+      WATCHDOG_WARNING);
+  }
+}
+
+/**
+ * A callback to an unauthorized Error page.
+ *
+ * @return bool
+ *   A true status.
+ */
+function obiba_mica_app_angular_set_drupal_message_error() {
+  if (!user_is_logged_in()) {
+    drupal_set_message(t('Server rejected your request, please make sure you
+    are logged in and try again.'), 'error');
+  }
+  else {
+    drupal_set_message(t('You are not authorized to access the page.'), 'error');
+  }
+  return TRUE;
+}
+
+function obiba_mica_app_angular_get_access_config() {
+  return array(
+    'newRequestButtonCaption' => variable_get_value('access_new_request_button'),
+    'documentsSectionTitle' => variable_get_value('access_documents_section_title'),
+    'documentsSectionHelpText' => variable_get_value('access_documents_section_help_text'),
+    'downloadButtonCaption' => variable_get_value('access_download_button'),
+    'commentsEnabled' => variable_get_value('access_comments_enabled'),
+    'userListPageTitle' => variable_get_value('user_list_page_title'),
+    'newRequestButtonHelpText' => variable_get_value('access_new_request_button_info')
+  );
+}
+
+/**
+ * Analysis module settings.
+ */
+function obiba_mica_app_angular_get_analysis_config() {
+  return array(
+    'showAnalysis' => module_exists('obiba_mica_analysis') && obiba_mica_analysis_user_permission(),
+  );
+}
+
+/**
+ * Sets module settings.
+ */
+function obiba_mica_app_angular_get_sets_config() {
+  return array(
+    'CartHelpText' => variable_get_value('help_text_cart_page'),
+    'SetsHelpText' => variable_get_value('help_text_sets_page'),
+  );
+}
+
+/**
+ * Search Module settings
+ */
+function obiba_mica_app_angular_get_search_config() {
+  $get_array_value = function ($variable) {
+    return array_values(array_filter(array_map('trim', explode(',', variable_get_value($variable)))));
+  };
+  $result_tabs_order = $get_array_value('mica_result_tabs_order');
+
+  $show_item = function ($tab_item, $tabs) {
+    if (in_array($tab_item, $tabs)) {
+      return TRUE;
+    }
+    return FALSE;
+  };
+  $coverage_group_by_options = array_map(function($coverage_option){
+    return !empty($coverage_option)?TRUE:FALSE;
+  }, variable_get_value('coverage_group_by'));
+  $fieldsToFilter = array_values(array_filter(array(
+    'name',
+    'title',
+    variable_get_value('taxonomy_panel_fields_to_filter_description') ? 'description' : FALSE,
+    variable_get_value('taxonomy_panel_fields_to_filter_keywords') ? 'keywords' : FALSE,
+  )));
+  return array(
+    'SearchHelpText' => variable_get_value('help_text_search_page'),
+    'ClassificationHelpText' => variable_get_value('help_text_harmonization_potential_page'),
+    'SearchHelpLinkLabel' => variable_get_value('help_link_label'),
+    'SearchHelpLinkUrl' => variable_get_value('help_link_url'),
+    'showSearchBox' => variable_get_value('mica_show_search_box'),
+    'showSearchBrowser' => variable_get_value('mica_show_search_browser'),
+    'showCopyQuery' => variable_get_value('mica_search_show_copy_query'),
+    'targetTabsOrder' => $get_array_value('mica_target_tabs_order'),
+    'showAllFacetedTaxonomies' => false,
+    'variableTaxonomiesOrder' =>  array_keys(obiba_mica_commons_taxonomies_filter_array('mica_variable_taxonomies_order')),
+    'datasetTaxonomiesOrder' => empty(variable_get_value('mica_dataset_taxonomy_facet')) ? array() : array('Mica_dataset'),
+    'studyTaxonomiesOrder' => empty(variable_get_value('mica_study_taxonomy_facet')) ? array() : array('Mica_study'),
+    'networkTaxonomiesOrder' => empty(variable_get_value('mica_network_taxonomy_facet')) ? array() : array('Mica_network'),
+    'taxonomyPanelOptions' => array('fieldsToFilter' => $fieldsToFilter),
+    'searchTabsOrder' => $get_array_value('mica_search_tabs_order'),
+    'resultTabsOrder' => $result_tabs_order,
+    'variables' =>  array(
+        'showSearchTab' => $show_item(TARGET_VARIABLE, $result_tabs_order),
+        'listPageSize' => intval(variable_get_value('variables_list_page_size')),
+        'variablesColumn' => array(
+          'showVariablesTypeColumn' => variable_get_value('variables_column_type'),
+          'showVariablesStudiesColumn' => variable_get_value('variables_column_study'),
+          'showVariablesDatasetsColumn' => variable_get_value('variables_column_dataset'),
+          'showDatasetsStudiesColumn' => variable_get_value('datasets_column_studies'),
+          'showDatasetsVariablesColumn' => variable_get_value('datasets_column_variables'),
+        ),
+        'showCart' => module_exists('obiba_mica_sets')
+      ),
+    'datasets' =>
+      array(
+        'showSearchTab' => $show_item(TARGET_DATASET, $result_tabs_order),
+        'listPageSize' => intval(variable_get_value('datasets_list_page_size')),
+        'showDatasetsSearchFilter' => variable_get_value('search_datasets_autocomplete'),
+        'datasetsColumn' => array(
+          'showDatasetsAcronymColumn' => variable_get_value('datasets_column_acronym'),
+          'showDatasetsTypeColumn' => variable_get_value('datasets_column_type'),
+          'showDatasetsNetworkColumn' => variable_get_value('datasets_column_networks'),
+          'showDatasetsStudiesColumn' => variable_get_value('datasets_column_studies'),
+          'showDatasetsVariablesColumn' => variable_get_value('datasets_column_variables'),
+        )
+      ),
+    'studies' =>
+      array(
+        'showSearchTab' => $show_item(TARGET_STUDY, $result_tabs_order),
+        'listPageSize' => intval(variable_get_value('studies_list_page_size')),
+        'showStudiesSearchFilter' => variable_get_value('studies_facet_search'),
+        'studiesColumn' => array(
+          'showStudiesTypeColumn' => variable_get_value('studies_column_type'),
+          'showStudiesDesignColumn' => variable_get_value('studies_column_design'),
+          'showStudiesQuestionnaireColumn' => variable_get_value('studies_column_questionnaire'),
+          'showStudiesPmColumn' => variable_get_value('studies_column_pm'),
+          'showStudiesBioColumn' => variable_get_value('studies_column_bio'),
+          'showStudiesOtherColumn' => variable_get_value('studies_column_other'),
+          'showStudiesParticipantsColumn' => variable_get_value('studies_column_participants'),
+          'showStudiesNetworksColumn' => variable_get_value('studies_column_networks'),
+          'showStudiesStudyDatasetsColumn' => variable_get_value('studies_column_study_datasets'),
+          'showStudiesHarmonizationDatasetsColumn' => variable_get_value('studies_column_harmonization_datasets'),
+          'showStudiesVariablesColumn' => variable_get_value('studies_column_variables'),
+          'showStudiesStudyVariablesColumn' => variable_get_value('studies_column_study_variables'),
+          'showStudiesDataschemaVariablesColumn' => variable_get_value('studies_column_dataschema_variables'),
+        )
+      ),
+    'networks' =>
+      array(
+        'showSearchTab' => $show_item(TARGET_NETWORK, $result_tabs_order),
+        'listPageSize' => intval(variable_get_value('networks_list_page_size')),
+        'networksColumn' => array(
+          'showNetworksStudiesColumn' => variable_get_value('networks_column_studies'),
+          'showNetworksStudyDatasetColumn' => variable_get_value('networks_column_study_datasets'),
+          'showNetworksHarmonizationDatasetColumn' => variable_get_value('networks_column_harmonization_datasets'),
+          'showNetworksVariablesColumn' => variable_get_value('networks_column_variables'),
+          'showNetworksStudyVariablesColumn' => variable_get_value('networks_column_study_variables'),
+          'showNetworksDataschemaVariablesColumn' => variable_get_value('networks_column_dataschema_variables'),
+        )
+      ),
+    'coverage' =>
+      array(
+        'groupBy' => $coverage_group_by_options,
+      ),
+  );
+}

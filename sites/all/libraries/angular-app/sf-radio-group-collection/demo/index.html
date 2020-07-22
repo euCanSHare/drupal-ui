@@ -1,0 +1,138 @@
+<html>
+
+<head>
+  <script src="../bower_components/angular/angular.min.js"></script>
+  <script src="../bower_components/angular-sanitize/angular-sanitize.min.js"></script>
+  <script src="../bower_components/tv4/tv4.js"></script>
+  <script src="../bower_components/objectpath/lib/ObjectPath.js"></script>
+  <script src="../bower_components/angular-schema-form/dist/schema-form.js"></script>
+  <script src="../bower_components/angular-schema-form-bootstrap/bootstrap-decorator.js"></script>
+  <script src="../bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+  <script src="../dist/sf-radio-group-collection.js"></script>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="main.css">
+
+  <script>
+    angular.module('test', ["schemaForm", "sfRadioGroupCollection", "ui.bootstrap"]).controller('FormController', function ($scope) {
+
+      $scope.clearModel = function () {
+        $scope.model = {};
+        $scope.$broadcast('schemaFormValidate');
+      };
+
+      $scope.schema = {
+        "type": "object",
+        "properties": {
+          "option": {
+            "type": "object",
+            "format": "radioGroupCollection",
+            "title": "Tell us about yourself",
+            "values": [
+              {"key": "ham-en", "caption": "Ham"}, {"key": "ham-ru", "caption": "ветчина"}, {"key": "ham-fr", "caption": "Jambon"}, {"key": "ham-it", "caption": "Prosciutto"}, {"key": "ham-es", "caption": "Jamón"}
+            ],
+            "items": [
+              {
+                "name": "Are you married?", "key": "are_you_married"
+              },
+              {
+                "name": "Are you happy?", "key": "are_you_happy"
+              },
+              {
+                "name": "Do you drink red wine?", "key": "do_you_drink_red_wine"
+              },
+              {
+                "name": "Do you have a horse?", "key": "do_you_have_a_horse"
+              }
+            ]
+          }
+        }
+      };
+
+      $scope.form = [
+        {
+          "type": "radioGroupCollection",
+          "key": "option",
+          "required": true,
+          "validationMessage": {
+            "allItemsSelected": "You must answer all questions."
+          }
+        }
+      ];
+
+      $scope.form2 = [
+        {
+          "type": "radioGroupCollection",
+          "key": "option",
+          "checkboxMode": true,
+          "required": true,
+          "validationMessage": {
+            "allItemsSelected": "You must answer all questions."
+          }
+        }
+      ];
+
+      $scope.model = {};
+      $scope.cmodel = {};
+
+      $scope.sfOptions = {
+      };
+
+      $scope.debug = { schema: angular.copy($scope.schema), form: angular.copy($scope.form), options: angular.copy($scope.sfOptions) };
+
+    });
+
+  </script>
+  <title>Testing sf-radio-group-collection addon</title>
+</head>
+
+<body ng-app="test">
+
+  <div class="container-fluid" ng-controller="FormController">
+    <button ng-click="clearModel()">Clear</button>
+
+    <div class="col-sm-12">
+      <h2>sf-radio-group-collection</h2>
+    </div>
+
+    <div class="col-sm-6 form">
+      <form sf-schema="schema" sf-form="form" sf-model="model" sf-options="sfOptions"></form>
+
+      <h3>"checkboxMode" is true</h3>
+      <form sf-schema="schema" sf-form="form2" sf-model="cmodel" sf-options="sfOptions"></form>
+    </div>
+
+
+    <div class="col-sm-6 debug">
+      <div class="wrapper">
+        <div class="row">
+          <div class="col-md-12">
+            <h4>Model</h4>
+            <pre>{{model | json}}</pre>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <h4>Form</h4>
+            <pre>{{debug.form | json}}</pre>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <h4>Schema</h4>
+            <pre>{{debug.schema | json}}</pre>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <h4>Options</h4>
+            <pre>{{debug.options | json}}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+
+</html>

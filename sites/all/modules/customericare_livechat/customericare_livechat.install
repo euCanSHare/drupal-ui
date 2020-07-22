@@ -1,0 +1,48 @@
+<?php
+
+/**
+ * Implementation of hook_requirements().
+ *
+ * @param array $phase
+ *
+ * @return array
+ */
+function customericare_livechat_requirements($phase)
+{
+    $rq = array();
+
+    if('runtime' == $phase)
+    {
+        if(!variable_get('cic_apikey', false))
+        {
+            $rq['customericare_livechat'] = array(
+                'title' => t('CustomerICare Live Chat module'),
+                'description' => t('CustomerICare Live Chat module has not been configured yet. Please go to <a href="'.url('admin/settings/customericare_livechat').'">CustomerICare Live Chat settings</a>.'),
+                'severity' => REQUIREMENT_ERROR,
+                'value' => t('Not configured'),
+            );
+        }
+    }
+
+    return $rq;
+}
+
+/**
+ * Implementation of hook_install()
+ */
+function customericare_livechat_install()
+{
+    variable_set('cic_apikey', '');
+    variable_set('cic_api_email', '');
+    variable_set('cic_api_token', '');
+}
+
+/**
+ * Implementation of hook_uninstall()
+ */
+function customericare_livechat_uninstall()
+{
+    variable_del('cic_apikey');
+    variable_del('cic_api_email');
+    variable_del('cic_api_token');
+}

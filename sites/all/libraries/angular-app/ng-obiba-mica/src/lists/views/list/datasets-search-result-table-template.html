@@ -1,0 +1,54 @@
+<div>
+    <div class="col-md-12"><div ng-if="loading" class="loading "></div></div>
+    <div ng-show="!loading" class="col-md-12">
+        <p class="help-block" ng-if="!summaries || !summaries.length" translate>search.dataset.noResults</p>
+        <div ng-repeat="summary in summaries" class="row sm-bottom-margin document-item-list flex-row" test-ref="dataset">
+            <div class="col-md-12  col-sm-12 col-xs-12">
+                <h4>
+                    <a ng-href="{{PageUrlService.datasetPage(summary.id, summary.variableType)}}">
+                        <localized value="summary.name" lang="lang"></localized>
+                    </a>
+                </h4>
+                <p>
+                    <localized value="summary.description"
+                               ellipsis-size="250"
+                               markdown-it="true"
+                               lang="lang"></localized>
+                </p>
+                <a ng-if="summary.description" href="{{PageUrlService.datasetPage(summary.id, summary.variableType)}}" >{{"global.read-more" | translate}}</a>
+                <div class="clear-fix"></div>
+                <div class="sm-top-margin countDetail voffset3">
+                    {{counts=summary['obiba.mica.CountStatsDto.datasetCountStats'];""}}
+                    <a ng-if="counts.networks && options.obibaListOptions.showNetworkBadge!==false"
+                       href="{{'networks' | doSearchQuery : 'dataset(in(Mica_dataset.id,' + summary.id +  '))' }}"
+                       class="btn btn-default btn-xxs"
+                       test-ref="studyCount">
+                        <localized-number
+                                value="counts.networks"></localized-number>
+                        {{counts.networks > 1 ? "networks" : "network.label"
+                        | translate}}
+                    </a>
+                    <a ng-if="counts.studies && options.obibaListOptions.showStudyBadge!==false"
+                       href="{{'studies' | doSearchQuery : 'dataset(in(Mica_dataset.id,' + summary.id +  '))' }}"
+                       class="btn btn-default btn-xxs"
+                       test-ref="studyCount">
+                        <localized-number
+                                value="counts.studies"></localized-number>
+                        {{counts.studies > 1 ? "studies" : "study.label"
+                        | translate}}
+                    </a>
+
+                    <a ng-if="counts.variables && options.obibaListOptions.showVariableBadge!==false"
+                       href="{{'variables' | doSearchQuery : 'dataset(in(Mica_dataset.id,' + summary.id +  '))' }}"
+                       class="btn btn-default btn-xxs"
+                       test-ref="variableCount">
+                        <localized-number
+                                value="counts.variables"></localized-number>
+                        {{counts.variables > 1 ? "variables" : "search.variable.facet-label"
+                        | translate}}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

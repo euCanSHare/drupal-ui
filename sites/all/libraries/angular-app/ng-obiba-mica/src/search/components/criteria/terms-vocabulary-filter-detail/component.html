@@ -1,0 +1,43 @@
+<div ng-if="$index % 4 == 0"  class="row margin-left--5"
+     ng-repeat="term in $ctrl.vocabulary.filteredTerms | sortTerms:$ctrl.vocabulary | limitTo:$ctrl.limitNumber">
+  <div class="col-xs-3 col-md-3" ng-repeat="key in [0,1,2,3]">
+    <div ng-show="$ctrl.vocabulary.filteredTerms[$parent.$index + key]" class="checkbox">
+      <label uib-popover="{{$ctrl.vocabulary.filteredTerms[$parent.$index + key].description ? $ctrl.vocabulary.filteredTerms[$parent.$index + key].description :
+       $ctrl.vocabulary.filteredTerms[$parent.$index + key].title | localizedString}}"
+             popover-title="{{$ctrl.vocabulary.filteredTerms[$parent.$index + key].description ? $ctrl.vocabulary.filteredTerms[$parent.$index + key].title :
+              null | localizedString}}"
+             popover-placement="bottom"
+             popover-trigger="'mouseenter'"
+             popover-popup-delay="250"
+             popover-class="right-panel-popover"
+             for="$ctrl.vocabulary.filteredTerms[$parent.$index + key]-{{$ctrl.vocabulary.name + '-' + ($parent.$index + key) + '-' +
+             $ctrl.vocabulary.filteredTerms[$parent.$index + key].name}}"
+             class="word-break">
+        <input id="$ctrl.vocabulary.filteredTerms[$parent.$index + key]-{{$ctrl.vocabulary.name + '-' + ($parent.$index + key) + '-' +
+              $ctrl.vocabulary.filteredTerms[$parent.$index + key].name}}"
+               type="checkbox"
+               ng-model="$ctrl.vocabulary.filteredTerms[$parent.$index + key].selected"
+               ng-click="$ctrl.clickCheckbox($ctrl.vocabulary.filteredTerms[$parent.$index + key])">
+                  {{$ctrl.vocabulary.filteredTerms[$parent.$index + key].title | localizedString}}
+      </label>
+    </div>
+  </div>
+</div>
+<span class="clearfix"></span>
+<div class="row">
+  <div class="col-md-12">
+    <div class="btn-group pull-right">
+      <button type="button" ng-if="$ctrl.limitNumber > $ctrl.constantLimitNumber"
+              class="btn btn-xs btn-primary"
+              ng-click="$ctrl.limitNumber = $ctrl.constantLimitNumber">
+        {{'search.facet.less' | translate}}
+      </button>
+      <button type="button" ng-if="$ctrl.vocabulary.filteredTerms.length > $ctrl.limitNumber"
+              class="btn btn-xs btn-primary"
+              ng-click="$ctrl.limitNumber = $ctrl.vocabulary.filteredTerms.length">
+        {{'search.facet.more' | translate}}
+      </button>
+    </div>
+  </div>
+</div>
+

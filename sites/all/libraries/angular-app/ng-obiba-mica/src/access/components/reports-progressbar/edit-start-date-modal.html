@@ -1,0 +1,28 @@
+<div class="modal-header">
+  <h4 class="modal-title">
+    {{'start-date' | translate}}
+  </h4>
+</div>
+
+<div class="modal-body">
+  <form name="startDateModalForm">
+    <div class="form-group">
+      <div class="input-group">
+        <input type="text" class="form-control" uib-datepicker-popup="yyyy-MM-dd" ng-model="$modal.startDate" ng-required="true"
+          ng-focus="$modal.open = !$modal.startDate" is-open="$modal.open" placeholder="yyyy-MM-dd" show-button-bar="false">
+        <span class="input-group-btn">
+          <button type="button" class="btn btn-sm btn-default" ng-click="$modal.open = !$modal.open">
+            <i class="glyphicon glyphicon-calendar"></i>
+          </button>
+        </span>
+      </div>
+      <p class="help-block">{{'data-access-request.start-date-help' | translate}}</p>
+    </div>
+  </form>
+</div>
+
+<div class="modal-footer">
+  <button class="btn btn-responsive btn-default" type="button" ng-click="$dismiss()" translate>cancel</button>
+  <button class="btn btn-responsive btn-primary" type="button" ng-disabled="!$modal.valideDate()"
+    ng-click="$modal.close()" translate>ok</button>
+</div>

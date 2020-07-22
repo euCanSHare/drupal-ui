@@ -1,0 +1,43 @@
+<?php
+
+/**
+* @file
+* Live Chat by CustomerICare.
+*/
+
+/**
+ * Implements hook_menu().
+ */
+function customericare_livechat_menu()
+{
+    $item['admin/settings/customericare_livechat'] = array(
+        'title' => 'CustomerICare Live Chat',
+        'description' => 'CustomerICare Live Chat settings',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('customericare_livechat_settings_form'),
+        'access arguments' => array('administer customericare_livechat'),
+        'file' => 'customericare_livechat.settings.inc',
+        'type' => MENU_NORMAL_ITEM,
+    );
+
+    return $item;
+}
+
+/**
+ * Implements hook_init().
+ */
+function customericare_livechat_init()
+{
+    if($apiKey = variable_get('cic_apikey', false))
+    {
+        drupal_add_js('!(function($){ $("<div>").addClass("ao_plugin").appendTo(document.body) }(jQuery));', array(
+            'scope' => 'footer',
+            'type' => 'inline',
+        ));
+
+        drupal_add_js('https://app.customericare.com/api?key='.$apiKey, array(
+            'type' => 'external',
+            'scope' => 'footer',
+        ));
+    }
+}

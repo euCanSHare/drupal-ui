@@ -1,0 +1,30 @@
+<div ng-show="$ctrl.pagination.totalHits > 10">
+  <div class="pull-left">
+    <select class="form-control input-sm form-select"
+            ng-model="$ctrl.pagination.selected"
+            ng-options="size.label for size in $ctrl.pagination.pageSizes"
+            ng-change="$ctrl.pageSizeChanged()"></select>
+  </div>
+  <div class="pull-right" style="margin-left: 5px">
+
+    <span ng-show="$ctrl.pagination.maxSize > 1"
+          uib-pagination
+          total-items="$ctrl.pagination.totalHits"
+          max-size="$ctrl.pagination.maxSize"
+          ng-model="$ctrl.pagination.currentPage"
+          boundary-links="true"
+          force-ellipses="true"
+          items-per-page="$ctrl.pagination.selected.value"
+          previous-text="&lsaquo;"
+          next-text="&rsaquo;"
+          first-text="&laquo;"
+          last-text="&raquo;"
+          template-url="search/views/list/pagination-template.html"
+          ng-change="$ctrl.pageChanged()"></span>
+    <ul class="pagination pagination-sm" ng-show="$ctrl.showPaginationTotal">
+      <li>
+        <a href class="pagination-total">{{$ctrl.pagination.from}} - {{$ctrl.pagination.to}} {{'of' | translate}} {{$ctrl.pagination.totalHits}}</a>
+      </li>
+    </ul>
+  </div>
+</div>

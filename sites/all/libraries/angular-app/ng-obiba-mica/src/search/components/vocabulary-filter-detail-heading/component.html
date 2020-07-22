@@ -1,0 +1,31 @@
+<div class="panel-body vocabulary-filter-detail-heading">
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-lg-4">
+            <input-search-filter
+                    taxonomy-name="$ctrl.taxonomyName"
+                    taxonomies-query="$ctrl.taxonomiesQuery"
+                    class="input-search-filter"
+                    clear-query="$ctrl.clearQuery"
+                    on-filter-change="$ctrl.filterChange(queryString)">
+            </input-search-filter>
+        </div>
+        <div class="col-xs-12 col-sm-11 col-lg-7 voffset1">
+            <entity-counts
+                    taxonomy-type-map="$ctrl.taxonomyTypeMap"
+                    result-tabs-order="$ctrl.resultTabsOrder"
+                    target="$ctrl.target"
+                    on-select-type="$ctrl.selectType(type)"
+                    result="$ctrl.result">
+            </entity-counts>
+        </div>
+        <div class="col-xs-12 col-sm-1 col-lg-1">
+            <button type="button"
+                    class="voffset1 pull-right close"
+                    data-dismiss="alert"
+                    aria-label="Close"
+                    ng-click="$ctrl.togglePannel()"
+                    title="{{'global.close-panel'|translate}}"><span aria-hidden="true">×</span>
+            </button>
+        </div>
+    </div>
+</div>

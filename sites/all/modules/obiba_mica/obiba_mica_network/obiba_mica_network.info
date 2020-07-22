@@ -1,0 +1,14 @@
+name = "Obiba Mica Network"
+description = "Mica Client -- Network"
+package = Obiba
+core = 7.x
+
+dependencies[] = obiba_mica_commons
+dependencies[] = obiba_mica_study
+
+files[] = includes/obiba_mica_network_resource.inc
+; Information added by Drupal.org packaging script on 2020-06-03
+version = "7.x-41.0"
+core = "7.x"
+project = "obiba_mica"
+datestamp = "1591212174"

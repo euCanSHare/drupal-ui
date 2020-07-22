@@ -1,0 +1,27 @@
+<div uib-accordion-group class="panel-default" is-open="$ctrl.status.isFirstOpen">
+  <div uib-accordion-heading>
+    <span>
+      <i class="fa" ng-class="{'fa-caret-down': $ctrl.status.isFirstOpen, 'fa-caret-right':!$ctrl.status.isFirstOpen}"></i>
+    </span>
+    {{$ctrl.metaTaxonomy.title | localizedString}}
+  </div>
+
+  <ul class="nav nav-pills nav-stacked">
+    <li role="presentation" ng-repeat="taxonomy in $ctrl.metaTaxonomy.taxonomies" ng-class="{'active': taxonomy.state.isActive() && $ctrl.showTaxonomyPanel}">
+      <a href ng-click="$ctrl.selectTaxonomy(taxonomy)">
+        <span
+          uib-popover="{{taxonomy.info.description | localizedString}}"
+          popover-title="{{taxonomy.info.trKey ? (taxonomy.info.trKey | translate) : (taxonomy.info.title | localizedString)}}"
+          popover-placement="bottom"
+          popover-trigger="'mouseenter'"
+          popover-popup-delay="250">
+          {{taxonomy.info.trKey ? (taxonomy.info.trKey | translate) : (taxonomy.info.title | localizedString)}}
+        </span>
+        <span ng-if="taxonomy.state.isLoading()" class="loading"></span>
+        <span class="pull-right"><i class="fa fa-chevron-right"></i></span>
+      </a>
+    </li>
+  </ul>
+
+</div>
+

@@ -1,0 +1,16 @@
+name = Obiba Mica Graphic
+description = Api to get Geo/Pies graphics via ajax call
+package = Obiba
+core = 7.x
+
+dependencies[] = obiba_mica_commons
+dependencies[] = obiba_mica_app_angular
+dependencies[] = obiba_mica_repository
+
+files[] = includes/obiba_mica_graphic_statistics_resources.inc
+
+; Information added by Drupal.org packaging script on 2020-06-03
+version = "7.x-41.0"
+core = "7.x"
+project = "obiba_mica"
+datestamp = "1591212174"

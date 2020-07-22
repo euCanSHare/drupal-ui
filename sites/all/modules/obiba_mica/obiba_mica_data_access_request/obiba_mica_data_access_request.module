@@ -1,0 +1,616 @@
+<?php
+/**
+ * Copyright (c) 2018 OBiBa. All rights reserved.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+use Obiba\ObibaMicaClient\MicaClient\DrupalMicaClient as DrupalMicaClient;
+
+/**
+ * Implements hook_menu().
+ */
+function obiba_mica_data_access_request_menu() {
+
+  $items = array();
+
+  $items[MicaClientPathProvider::DATA_ACCESS] = array(
+    'title' => t('Data Access Request'),
+    'page callback' => 'obiba_mica_data_access_request_page',
+    'access callback' => TRUE,
+    'expanded' => TRUE,
+    'menu_name' => 'main-menu',
+    'type' => MENU_NORMAL_ITEM,
+    'weight' => 4,
+  );
+
+  $items[MicaClientPathProvider::DATA_ACCESS_HOME] = array(
+    'title callback' => 'obiba_mica_commons_get_menu_title',
+    'title arguments' => array('access_home_page_title'),
+    'description' => 'Data access process',
+    'access callback' => TRUE,
+    'menu_name' => 'main-menu',
+    'type' => MENU_NORMAL_ITEM,
+    'weight' => 0,
+  );
+
+  $items['mica/data_access/requests/ws'] = array(
+    'page callback' => 'obiba_mica_data_access_requests_action',
+    'access callback' => TRUE,
+    'file' => 'obiba_mica_data_access_request_service.inc',
+  );
+
+  $items['mica/data_access/request/%/amendments/ws'] = array(
+    'page callback' => 'obiba_mica_data_access_requests_action',
+    'access callback' => TRUE,
+    'file' => 'obiba_mica_data_access_request_service.inc',
+    'page arguments' => array(3),
+  );
+
+  $items[MicaClientPathProvider::DATA_ACCESS . '/requests/csv/ws'] = array(
+    'page callback' => 'obiba_mica_data_access_request_csv_download',
+    'file' => 'obiba_mica_data_access_request.module',
+    'access callback' => TRUE,
+  );
+
+  $items[MicaClientPathProvider::DATA_ACCESS . '/requests/_history/ws'] = array(
+    'page callback' => 'obiba_mica_data_access_request_history_download',
+    'file' => 'obiba_mica_data_access_request.module',
+    'access callback' => TRUE,
+  );
+
+  $items['mica/data_access/request/%/comments/ws'] = array(
+    'page callback' => 'obiba_mica_data_access_request_comments_action',
+    'access callback' => TRUE,
+    'page arguments' => array(3),
+    'file' => 'obiba_mica_data_access_request_service.inc',
+  );
+
+  $items['mica/data_access/request/%/comment/%/ws'] = array(
+    'page callback' => 'obiba_mica_data_access_request_comment_action',
+    'access callback' => TRUE,
+    'page arguments' => array(3, 5),
+    'file' => 'obiba_mica_data_access_request_service.inc',
+  );
+
+  $items['mica/data_access/request/%/_pdf/ws'] = array(
+    'page callback' => 'obiba_mica_data_access_request_download_pdf',
+    'access callback' => TRUE,
+    'page arguments' => array(3),
+    'file' => 'obiba_mica_data_access_request_service.inc',
+  );
+
+  $items['mica/data_access/request/%/attachments/%/_download/ws'] = array(
+    'page callback' => 'obiba_mica_data_access_request_attachment',
+    'access callback' => TRUE,
+    'page arguments' => array(3, 5),
+    'file' => 'obiba_mica_data_access_request_service.inc',
+  );
+
+  $items['mica/data_access/request/form/attachments/%/%/_download/ws'] = array(
+    'page callback' => 'obiba_mica_data_access_request_form_attachment',
+    'access callback' => TRUE,
+    'page arguments' => array(5,6),
+    'file' => 'obiba_mica_data_access_request_service.inc',
+  );
+
+  $items['mica/data_access/request/%/_status/%/ws'] = array(
+    'page callback' => 'obiba_mica_data_access_request_update_request',
+    'access callback' => TRUE,
+    'page arguments' => array(3, 5),
+    'file' => 'obiba_mica_data_access_request_service.inc',
+  );
+
+  $items['mica/data_access/request/%/amendment/%/_status/%/ws'] = array(
+    'page callback' => 'obiba_mica_data_access_amendment_update_request',
+    'access callback' => TRUE,
+    'page arguments' => array(3, 5, 7),
+    'file' => 'obiba_mica_data_access_request_service.inc',
+  );
+
+  $items['mica/data_access/request/upload-file'] = array(
+    'page callback' => 'obiba_mica_data_access_request_upload_attachment',
+    'access callback' => TRUE,
+    'file' => 'obiba_mica_data_access_request_service.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['mica/data_access/request/%/ws'] = array(
+    'page callback' => 'obiba_mica_data_access_request_action',
+    'access callback' => TRUE,
+    'page arguments' => array(3),
+    'file' => 'obiba_mica_data_access_request_service.inc',
+  );
+
+  $items['mica/data_access/request/%/_start-date/ws'] = array(
+    'page callback' => 'obiba_mica_data_access_request_start_date',
+    'access callback' => TRUE,
+    'page arguments' => array(3),
+    'file' => 'obiba_mica_data_access_request_service.inc',
+  );
+
+  $items['mica/data_access/request/%/_log-actions/ws'] = array(
+    'page callback' => 'obiba_mica_data_access_request_action_logs',
+    'access callback' => TRUE,
+    'page arguments' => array(3),
+    'file' => 'obiba_mica_data_access_request_service.inc',
+  );
+
+  $items['mica/data_access/request/%/amendments/_history/ws'] = array(
+    'page callback' => 'obiba_mica_data_access_amendments_history',
+    'access callback' => TRUE,
+    'page arguments' => array(3),
+    'file' => 'obiba_mica_data_access_request_service.inc',
+  );
+
+  $items['mica/data_access/request/%/amendment/%/ws'] = array(
+    'page callback' => 'obiba_mica_data_access_request_action',
+    'access callback' => TRUE,
+    'page arguments' => array(3, 5),
+    'file' => 'obiba_mica_data_access_request_service.inc',
+  );
+
+  $items['mica/data_access/request/%/_attachments/ws'] = array(
+      'page callback' => 'obiba_mica_data_access_request_attachments_update',
+      'access callback' => TRUE,
+      'page arguments' => array(3),
+      'file' => 'obiba_mica_data_access_request_service.inc',
+  );
+
+  $items['mica/data_access/request/file/%'] = array(
+    'page callback' => 'obiba_mica_data_access_request_get_attachment',
+    'access callback' => TRUE,
+    'page arguments' => array(4),
+    'file' => 'obiba_mica_data_access_request_service.inc',
+  );
+
+  $items['mica/data_access/data-access-form/ws'] = array(
+    'page callback' => 'obiba_mica_data_access_request_form_get_config',
+    'access callback' => TRUE,
+    'file' => 'obiba_mica_data_access_request_service.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['mica/data_access/data-access-amendment-form/ws'] = array(
+    'page callback' => 'obiba_mica_data_access_amendment_form_get_config',
+    'access callback' => TRUE,
+    'file' => 'obiba_mica_data_access_request_service.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['mica/data_access/request/delete/%/ws'] = array(
+    'page callback' => 'obiba_mica_data_access_request_delete_request_access',
+    'page arguments' => array(4),
+    'file' => 'obiba_mica_data_access_request_service.inc',
+    'access callback' => TRUE,
+  );
+
+  $items['mica/data_access/request/redirect/%/%'] = array(
+    'page callback' => 'obiba_mica_data_access_request_redirect',
+    'page arguments' => array(4, 5),
+    'file' => 'obiba_mica_data_access_request_service.inc',
+    'access callback' => TRUE,
+  );
+
+  $items['mica/data_access/user/%/ws'] = array(
+    'page callback' => 'obiba_mica_data_access_request_user_profile',
+    'page arguments' => array(3),
+    'file' => 'obiba_mica_data_access_request_service.inc',
+    'access callback' => TRUE
+  );
+
+  $items['mica/data_access/users/ws'] = array(
+    'page callback' => 'obiba_mica_data_access_request_users',
+    'page arguments' => array(3),
+    'file' => 'obiba_mica_data_access_request_service.inc',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK
+  );
+
+  $items[MicaClientPathProvider::DATA_ACCESS_USERS_LIST] = array(
+    'title callback' => 'obiba_mica_commons_get_menu_title',
+    'title arguments' => array('user_list_page_title'),
+    'page callback' => 'obiba_mica_data_access_request_users_list_page',
+    'description' => 'List Researchers',
+    'access callback' => 'obiba_mica_data_access_request_permission_check',
+    'access arguments' => array('dao'),
+    'menu_name' => 'main-menu',
+    'type' => MENU_NORMAL_ITEM,
+    'weight' => 1000
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_preprocess_menu_link().
+ */
+function obiba_mica_data_access_request_preprocess_menu_link(&$variables) {
+  if (isset($variables['element']['#localized_options']['attributes']['title'])){
+    $variables['element']['#localized_options']['attributes']['title'] = '';
+  }
+  if(strstr($variables['element']['#href'], 'mica/data_access'))
+  {
+    obiba_mica_commons_setting_menu_title_from_callback($variables);
+  }
+}
+
+/**
+ * Callback to check permission.
+ *
+ * @return bool
+ *   TRUE/FALSE Statment.
+ */
+function obiba_mica_data_access_request_permission_check($access_arguments = NULL) {
+  if ($access_arguments) {
+    return user_access('can_see_' . MicaDataAccessRequest::LIST_USERS_DATA_ACCESS);
+  }
+  return obiba_mica_commons_is_authorized_agate_user();
+}
+
+function obiba_mica_data_access_request_csv_download() {
+
+  $lang = drupal_get_query_parameters()['lang'];
+
+  $data_access_requests_resources = new MicaDataAccessRequests();
+  $response = $data_access_requests_resources->downloadCsvExport($lang);
+
+  if (!empty($response)) {
+    $headers = $data_access_requests_resources->getLastResponseHeaders();
+    drupal_add_http_header('Content-Disposition', $headers['Content-Disposition'][0]);
+    ob_clean();
+    $csv_response = $response->body;
+    print $csv_response;
+    exit;
+  }
+}
+
+function obiba_mica_data_access_request_history_download() {
+
+  $lang = drupal_get_query_parameters()['lang'];
+
+  $data_access_requests_resources = new MicaDataAccessRequests();
+  $response = $data_access_requests_resources->downloadHistory($lang);
+
+  if (!empty($response)) {
+    $headers = $data_access_requests_resources->getLastResponseHeaders();
+    drupal_add_http_header('Content-Disposition', $headers['Content-Disposition'][0]);
+    ob_clean();
+    $csv_response = $response->body;
+    print $csv_response;
+    exit;
+  }
+}
+
+/**
+ * Implements hook_load_menus().
+ */
+function obiba_mica_data_access_request_load_menus() {
+  $items = array();
+
+  $items[MicaClientPathProvider::DATA_ACCESS_REQUEST] = array(
+    'access callback' => 'obiba_mica_data_access_request_permission_check',
+    'module_caller' => 'obiba_mica_data_access_request',
+    'title callback' => 'obiba_mica_commons_get_menu_title',
+    'title arguments' => array('access_request_page_title'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items[MicaClientPathProvider::DATA_ACCESS_LIST] = array(
+    'access callback' => 'obiba_mica_data_access_request_permission_check',
+    'title callback' => 'obiba_mica_data_access_request_dar_title_callback',
+    'menu_name' => 'main-menu',
+    'options' => array('fragment' => 'data-access-requests'),
+    'type' => MENU_NORMAL_ITEM,
+    'weight' => 0,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function obiba_mica_data_access_request_theme($existing, $type, $theme, $path) {
+  $path_views_theme = $path . '/js/app/views';
+  $path_theme = $path . '/templates';
+
+  return array(
+    'obiba_mica_data_access_request-form-header' => array(
+      'template' => 'obiba_mica_data_access_request-form-header',
+      'path' => $path_views_theme,
+    ),
+    'obiba_mica_data_access_request-view-header' => array(
+      'template' => 'obiba_mica_data_access_request-view-header',
+      'path' => $path_views_theme,
+    ),
+    'obiba_mica_data_access_amendment-form-header' => array(
+      'template' => 'obiba_mica_data_access_amendment-form-header',
+      'path' => $path_views_theme,
+    ),
+    'obiba_mica_data_access_amendment-view-header' => array(
+      'template' => 'obiba_mica_data_access_amendment-view-header',
+      'path' => $path_views_theme,
+    ),
+    'data-access-request-profile-user-modal' => array(
+      'template' => 'data-access-request-profile-user-modal',
+      'path' => $path_views_theme
+    ),
+    'obiba_mica_data_access_request-page-data-access' => array(
+      'template' => 'obiba_mica_data_access_request-page-data-access',
+      'path' => $path_theme,
+    ),
+    'obiba_mica_data_access_request_user-profile-attributes' => array(
+      'template' => 'obiba_mica_data_access_request_user-profile-attributes',
+      'path' => $path_theme
+    ),
+    'obiba_mica_data_access_request-users-list' => array(
+      'template' => 'obiba_mica_data_access_request-users-list',
+      'path' => $path_theme
+    ),
+    'obiba_mica_data_access_request-user-profile-modal' => array(
+      'template' => 'obiba_mica_data_access_request-user-profile-modal',
+      'path' => $path_theme
+    ),
+  );
+}
+
+/**
+ * Implements hook_library().
+ */
+function obiba_mica_data_access_request_library() {
+  return obiba_mica_app_angular_load_angular_library();
+}
+
+/**
+ * Create/Update data access request node content page.
+ */
+function obiba_mica_data_access_request() {
+  $data_access_node_node = obiba_mica_commons_get_translated_node(variable_get_value('access_request_page'));
+  drupal_set_title($data_access_node_node['#node']->title);
+  if (!empty($data_access_node_node)) {
+    return $data_access_node_node;
+  }
+  else {
+    $my_body_content = "<div> <p>Requests for further information on the datasets and requests for access are received by
+the our Access Office. Prior to submitting a Data Access Application Form, we strongly recommend that you consult the
+our Policy documents, that will provide you with detailed information about the process and our's access, publication
+and intellectual property policies.</p> </div>";
+    $access_request_node_page = obiba_mica_commons_add_page(variable_get_value('access_request_page'), $my_body_content);
+    variable_set('access_request_page', $access_request_node_page->nid);
+    return node_view(node_load(variable_get_value('access_request_page')));
+  }
+}
+
+/**
+ * Data Access Request Title Callback
+ */
+function obiba_mica_data_access_request_dar_title_callback() {
+  $permissionResource = new DrupalMicaClient\DrupalMicaClientPermission();
+  return $permissionResource->userHasRole('mica-data-access-officer') ?
+    variable_get_value('access_requests_page_title') :
+    variable_get_value('access_request_my_page_title');
+}
+
+/**
+ * Callback to display data access request page.
+ */
+function obiba_mica_data_access_request_page() {
+
+  $data_access_list_display = FALSE;
+  $data_access_register_user = FALSE;
+
+  $node_rendred = obiba_mica_data_access_request();
+  drupal_set_title(variable_get_value('access_home_page_title'));
+
+  $node_rendred['#node']->title = '';
+  if (user_is_logged_in()) {
+    $data_access_list_display = TRUE;
+  }
+  else {
+    $data_access_register_user = TRUE;
+  }
+
+  return theme('obiba_mica_data_access_request-page-data-access', array(
+    'node_content' => $node_rendred,
+    'data_access_list_display' => $data_access_list_display,
+    'data_access_register_user' => $data_access_register_user,
+  ));
+}
+
+/**
+ * Implements hook_get_ng_module_to_load().
+ */
+function obiba_mica_data_access_request_get_ng_module_to_load() {
+  if (current_path() == MicaClientPathProvider::DATA_ACCESS_REQUEST || current_path() == MicaClientPathProvider::DATA_ACCESS_LIST) {
+    return 'mica.DataAccessRequest';
+  }
+  return FALSE;
+}
+
+/**
+ * Implements hook_get_js().
+ */
+function obiba_mica_data_access_request_get_js($weight_js) {
+  if (current_path() == MicaClientPathProvider::DATA_ACCESS_REQUEST || current_path() == MicaClientPathProvider::DATA_ACCESS_LIST) {
+    $module_path = drupal_get_path('module', 'obiba_mica_data_access_request');
+    $js = file_scan_directory($module_path . '/js/app', '/.*\.js$/', array('key' => 'name'));
+    ksort($js);
+    foreach ($js as $file_js) {
+      drupal_add_js($file_js->uri, array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => ++$weight_js,
+      ));
+    }
+  }
+  return ++$weight_js;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function obiba_mica_data_access_request_permission() {
+  return array(
+    "can_see_" . MicaDataAccessRequest::LIST_DATA_ACCESS => array(
+      'title' => t('Can view the data access requests list page'),
+      'description' => t('Note that this permission does not assume which operations can be performed on each request.'),
+    ),
+    "can_see_" . MicaDataAccessRequest::NEW_DATA_ACCESS => array(
+      'title' => t('Can create a new data access request'),
+      'description' => t('Note that this permission can be overruled by permission constraints on Mica server side.')
+    ),
+    "can_see_" . MicaDataAccessRequest::LIST_USERS_DATA_ACCESS => array(
+      'title' => t('Can view the list of research users'),
+      'description' => t('Note that this permission can be overruled by permission constraints on Mica server side.')
+    ),
+  );
+}
+
+/**
+ * Function to deal with permitted action.
+ */
+function obiba_mica_data_access_request_user_permission($action) {
+  return user_access('can_see_' . $action);
+}
+
+/**
+ * Get a value attribute.
+ */
+function obiba_mica_data_access_request_profile_attribute($user_attributes, $key) {
+  foreach ($user_attributes as $attr) {
+    if ($attr->key == $key) {
+      return $attr->value;
+    }
+  }
+  return NULL;
+}
+
+function obiba_mica_data_access_request_users_list_page() {
+  obiba_mica_data_access_requests_users_list_datatable_init();
+  drupal_set_title(variable_get_value('user_list_page_title'));
+  $profile_users_modal = theme('obiba_mica_data_access_request-user-profile-modal');
+  return theme('obiba_mica_data_access_request-users-list', array(
+    'profile_users_modal' => $profile_users_modal,
+  ));
+}
+
+function obiba_mica_data_access_get_icon_status($status) {
+  switch ($status) {
+    case 'OPENED':
+      return '<i class="glyphicon glyphicon-saved" title="'.t('Opened').'"></i>';
+    case 'SUBMITTED':
+      return '<i class="glyphicon glyphicon-export" title="'.t('Submitted').'"></i>';
+    case 'REVIEWED':
+      return '<i class="glyphicon glyphicon-check" title="'.t('Reviewed').'"></i>';
+
+    case 'APPROVED':
+      return '<i class="glyphicon glyphicon-ok" title="'.t('Approved').'"></i>';
+    case 'CONDITIONALLY_APPROVED':
+      return '<i class="glyphicon glyphicon-unchecked" title="'.t('Conditionally approved').'"></i>';
+    case 'REJECTED':
+      return '<i class="glyphicon glyphicon-remove" title="'.t('Rejected').'"></i>';
+
+  }
+}
+
+function obiba_mica_data_access_user_request_list($data_access_request) {
+  $status_icon = obiba_mica_data_access_get_icon_status($data_access_request->status);
+  $dar_url = url("mica/data_access/request", array(
+    'fragment' => "/data-access-request/$data_access_request->id"
+  ));
+  $output = <<<EOT
+  <div><span class="pull-left"><a href="$dar_url">$data_access_request->id</a></span>
+  <span class="pull-right">$status_icon</span></div>
+EOT;
+  return $output;
+}
+
+function obiba_mica_data_access_requests_dar_users($data_access_requests, $users = array()) {
+  $users_dar = is_object($users) ? array() : array_filter($users, function ($value_user) use ($data_access_requests) {
+    $id_dars = array();
+    if (array_filter($data_access_requests, function ($dar) use ($value_user, &$id_dars) {
+      if ($value_user->username === $dar->profile->username) {
+        $id_dars[] = obiba_mica_data_access_user_request_list($dar);
+        return TRUE;
+      }
+      else {
+        return FALSE;
+      }
+    })) {
+      $value_user->dars = $id_dars;
+      return $value_user;
+    }
+  });
+  return $users_dar;
+}
+
+function obiba_mica_data_access_requests_users_list_datatable_init() {
+  $user_list_rows = array();
+  if (drupal_get_library('obiba_mica_dataset', 'datatables')) {
+    drupal_add_library('obiba_mica_dataset', 'datatables');
+  }
+  else {
+    obiba_mica_commons_datatables_external_source();
+  }
+
+  global $user;
+  $agate_users = (new MicaDataAccessRequest())->getUsersList();
+  $requests = (new MicaDataAccessRequests(NULL, 'METHOD_GET'))->getRequests();
+  $users = obiba_mica_data_access_requests_dar_users($requests, $agate_users);
+  if (!isset($users->error)) {
+    $user_list_rows = obiba_mica_data_access_request_table_users_list_rows($users);
+  }
+  else {
+    drupal_set_message(t('An error occurred and processing did not complete Mica Server error: @message',
+      array('@message' => $users->error)), 'error');
+  }
+  drupal_add_js(drupal_get_path('module', 'obiba_mica_data_access_request') .
+    '/js/obiba_mica_data_access_request_users_list_datatable_init.js', 'file');
+  drupal_add_js(array(
+    'user' => $user,
+    'table_headers' => array(
+      array("title" => t('Username'), 'width' => '25%'),
+      array("title" => t('User'), 'width' => '25%'),
+      array("title" => variable_get_value('access_request_page_title'), 'width' => '15%'),
+      array("title" => t('Registration')),
+      array("title" => t('Last Login'))
+    ),
+    'table_data' => $user_list_rows,
+  ), 'setting');
+}
+
+function obiba_mica_data_access_request_table_users_list_rows($users = array()) {
+  $rows = array();
+  foreach ((is_object($users) ? array() : $users) as $user) {
+    $user_full_name =
+      obiba_mica_data_access_request_profile_attribute($user->attributes,
+        'firstName') .
+      ' ' .
+      obiba_mica_data_access_request_profile_attribute($user->attributes,
+        'lastName');
+    $user_email =
+      obiba_mica_data_access_request_profile_attribute($user->attributes,
+        'email');
+    $rows[] = array(
+      $user->username,
+      '<a id="applicantProfile" href="" data-toggle="modal"
+        data-target="#UserDetailModal"
+        data-id-applicant="' . $user->username . '"
+        data-name-applicant="' . $user_full_name . '"
+        data-email-applicant="' . $user_email . '">' . $user_full_name . '</a>',
+      $user->dars,
+      date_format(date_create(
+        obiba_mica_data_access_request_profile_attribute(
+          $user->attributes, 'createdDate')
+      ), "Y-m-d H:i:s"),
+      date_format(date_create(
+        obiba_mica_data_access_request_profile_attribute(
+          $user->attributes, 'lastLogin')
+      ), "Y-m-d H:i:s"),
+    );
+  }
+  return $rows;
+}

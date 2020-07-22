@@ -1,0 +1,173 @@
+<?php
+/**
+ * Copyright (c) 2018 OBiBa. All rights reserved.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+include_once('obiba_mica_research_project_admin_form.inc');
+
+use Obiba\ObibaMicaClient\MicaClient\DrupalMicaClient as DrupalMicaClient;
+use Obiba\ObibaMicaClient\MicaLocalisation as MicaLocalisation;
+
+/**
+ * Implements hook_menu().
+ */
+function obiba_mica_research_project_menu() {
+  $items = array();
+
+  $items[MicaClientPathProvider::RESEARCH_PROJECT] = array(
+    'title callback' => 'obiba_mica_commons_get_menu_title',
+    'title arguments' => array('project_research_menu_title'),
+    'description' => 'Research project',
+    'page callback' => 'obiba_mica_research_project_page_list',
+    'file' => 'obiba_mica_research_project-page-list.inc',
+    'access callback' => TRUE,
+    'expanded' => TRUE,
+    'menu_name' => 'main-menu',
+    'type' => MENU_NORMAL_ITEM,
+    'weight' => 5
+  );
+
+  $items[MicaClientPathProvider::RESEARCH_PROJECT_APPROVED] = array(
+    'title callback' => 'obiba_mica_commons_get_menu_title',
+    'title arguments' => array('project_approved_page_title'),
+    'description' => 'Approved research projects',
+    'access callback' => TRUE,
+    'menu_name' => 'main-menu',
+    'type' => MENU_NORMAL_ITEM,
+    'weight' => 2
+  );
+
+  $items['mica/project/%'] = array(
+    'page callback' => 'obiba_mica_research_project_page_detail',
+    'file' => 'obiba_mica_research_project-detail-page.inc',
+    'access callback' => TRUE,
+    'page arguments' => array(2)
+  );
+  $items['mica/project/%/draft/%'] = array(
+    'page callback' => 'obiba_mica_research_project_page_detail',
+    'file' => 'obiba_mica_research_project-detail-page.inc',
+    'access callback' => TRUE,
+    'page arguments' => array(2, 4)
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_menu_alter().
+ */
+function obiba_mica_research_project_menu_alter(&$items) {
+  $path_module_research_projects = drupal_get_path('module', 'obiba_mica_research_project');
+  $items[MicaClientPathProvider::DATA_ACCESS_PROJECTS] = array(
+    'title callback' => 'obiba_mica_research_project_list_page_title_callback',
+    'description' => 'List Research Projects',
+    'menu_name' => 'main-menu',
+    'file' => $path_module_research_projects . '/obiba_mica_research_project-page-list.inc',
+    'page callback' => 'obiba_mica_research_project_dar_research_projects_list_page',
+    'access callback' => 'obiba_mica_research_project_research_page_access',
+    'type' => MENU_NORMAL_ITEM,
+    'weight' => 3
+  );
+}
+
+/**
+ * Implements hook_preprocess_menu_link().
+ */
+function obiba_mica_research_project_preprocess_menu_link(&$variables) {
+  if (strstr($variables['element']['#href'], 'mica/research')) {
+    obiba_mica_commons_setting_menu_title_from_callback($variables);
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function obiba_mica_research_project_theme($existing, $type, $theme, $path) {
+  $path_theme = $path . '/templates';
+
+  return array(
+    'obiba_mica_research_project-list-page' => array(
+      'template' => 'obiba_mica_research_project-list-page',
+      'path' => $path_theme
+    ),
+    'obiba_mica_research_project-list-page-block' => array(
+      'template' => 'obiba_mica_research_project-list-page-block',
+      'path' => $path_theme
+    ),
+    'obiba_mica_research_project-detail-page' => array(
+      'template' => 'obiba_mica_research_project-detail',
+      'path' => $path_theme
+    )
+  );
+}
+
+/**
+ * Check user access for data access request's research projects page.
+ * @return bool
+ */
+function obiba_mica_research_project_research_page_access() {
+  return module_exists('obiba_mica_research_project') && user_is_logged_in();
+}
+
+/**
+ * Implements hook_library().
+ */
+function obiba_mica_research_project_library() {
+  return obiba_mica_app_angular_load_angular_library();
+}
+
+/**
+ * Create/Update research project node content page.
+ */
+function obiba_mica_research_project() {
+  $research_project_node_node = obiba_mica_commons_get_translated_node(variable_get_value('research_project_page'));
+  drupal_set_title($research_project_node_node['#node']->title);
+  if (!empty($research_project_node_node)) {
+    return $research_project_node_node;
+  }
+  else {
+    $research_project_node_page = obiba_mica_commons_add_page(variable_get_value('research_project_page'), '');
+    variable_set('research_project_page', $research_project_node_page->nid);
+    return node_view(node_load(variable_get_value('research_project_page')));
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function obiba_mica_research_project_form_obiba_mica_content_pages_admin_settings_alter(&$form, &$form_state, $form_id) {
+  obiba_mica_research_project_admin_settings($form);
+}
+
+/**
+ * Data Access Request Research Project Title Callback
+ */
+function obiba_mica_research_project_list_page_title_callback() {
+  $localize = obiba_mica_commons_mica_server_localisation();
+  $permissionResource = new DrupalMicaClient\DrupalMicaClientPermission();
+  return $permissionResource->userHasRole('mica-data-access-officer') ?
+    $localize->getTranslation('research-projects') :
+    variable_get_value('data_access_request_my_research_projects_title');
+}
+
+/**
+ * Verify  if a field exist in schema form definition.
+ * @param string $field
+ *
+ * @return boolean
+ */
+function obiba_mica_research_project_has_field($field) {
+  $config = obiba_mica_project_form_get_config();
+  foreach (json_decode($config->schema)->properties as $key_property => $property) {
+    if ($key_property === $field) {
+      return TRUE;
+    }
+  }
+  return FALSE;
+}

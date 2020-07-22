@@ -1,0 +1,15 @@
+name = "Obiba Mica Commons "
+description = "Mica Client -- Commons"
+package = Obiba
+core = 7.x
+
+dependencies[] = http_client
+
+files[] = includes/obiba_mica_commons_autoload.inc
+files[] = includes/obiba_mica_commons_resource_paths.inc
+
+; Information added by Drupal.org packaging script on 2020-06-03
+version = "7.x-41.0"
+core = "7.x"
+project = "obiba_mica"
+datestamp = "1591212174"

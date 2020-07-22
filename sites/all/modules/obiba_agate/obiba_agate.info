@@ -1,0 +1,18 @@
+name = "Obiba Agate"
+description = "Agate Client"
+package = Obiba
+core = 7.x
+
+dependencies[] = http_client
+dependencies[] = variable
+dependencies[] = autologout
+
+files[] = includes/agate_client.inc
+files[] = includes/agate_client_user_profile.inc
+scripts[] = js/obiba-agate-utilities.js
+
+; Information added by Drupal.org packaging script on 2019-08-14
+version = "7.x-15.0"
+core = "7.x"
+project = "obiba_agate"
+datestamp = "1565801939"

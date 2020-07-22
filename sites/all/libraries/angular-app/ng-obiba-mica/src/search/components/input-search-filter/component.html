@@ -1,0 +1,14 @@
+<div class=" pull-right">
+    <div class="input-group has-feedback">
+       <span class="input-group-addon">
+           <i class="fa fa-filter"></i>
+       </span>
+        <input type="text" ng-model="$ctrl.queryString"  ng-attr-placeholder="{{'search.placeholder.vocabulary-filter'  | translate}}"
+               class="input-search-filter form-control" ng-change="$ctrl.change()">
+        <span ng-if="$ctrl.queryString"
+              ng-click="$ctrl.clear()"
+              class="form-control-feedback form-control-clear width-initial height-initial padding-right-5 ">
+          <i class="fa fa-times"></i>
+        </span>
+    </div>
+</div>

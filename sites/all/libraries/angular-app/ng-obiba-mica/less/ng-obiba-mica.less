@@ -1,0 +1,619 @@
+@import "./variables";
+@import "./obiba-fonts";
+@import "./navs";
+
+a[ng-click] {
+  cursor: pointer;
+}
+
+.loading {
+  width: 16px;
+  height: 11px;
+  background: transparent url("../images/loading.gif");
+}
+
+span.loading {
+  display: inline-block;
+}
+
+.no-margin-top {
+  margin-top: 0 !important;
+}
+
+.no-margin-bottom {
+  margin-bottom: 0 !important;
+}
+
+.no-margin {
+  .no-margin-top;
+  .no-margin-bottom;
+}
+
+.no-padding-top {
+  padding-top: 0 !important;
+}
+
+.no-padding-bottom {
+  padding-bottom: 0 !important;
+}
+
+.no-padding-right {
+  padding-right: 0 !important;
+}
+
+.no-padding-left {
+  padding-left: 0 !important;
+}
+
+.no-padding {
+  .no-padding-top;
+  .no-padding-bottom;
+  .no-padding-left;
+  .no-padding-right;
+}
+
+.padding-right-initial {
+  padding-right: initial !important;
+}
+
+.word-break {
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+.width-initial {
+  width: initial !important;
+}
+
+.height-initial {
+  height: initial !important;
+}
+
+.padding-right-5 {
+  padding-right: 5px !important;
+}
+
+.padding-right-10 {
+  padding-right: 10px !important;
+}
+
+.margin-top-10 {
+  margin-top: 10px !important;
+}
+
+.margin-left--5 {
+  margin-left: -5px !important;
+}
+
+.margin-left-5 {
+  margin-left: 5px !important;
+}
+
+.margin-left-10 {
+  margin-left: 10px !important;
+}
+
+.margin-left-15 {
+  margin-left: 15px !important;
+}
+
+.flex {
+  display: flex !important;
+}
+
+.flex-item1 {
+  flex: 1 !important;
+}
+
+.flex-item2 {
+  flex: 2 !important;
+}
+
+.flex-item3 {
+  flex: 3 !important;
+}
+
+// TODO margin/padding styles similar to Bootstrap 4, see margin/padding style above
+// Can also upgrade the Less and use functions to generate margin/padding styles for a given range
+
+.voffset {
+  margin-top: 2px;
+}
+
+.voffset1 {
+  margin-top: 5px;
+}
+
+.voffset2 {
+  margin-top: 10px;
+}
+
+.voffset3 {
+  margin-top: 15px;
+}
+
+.voffset4 {
+  margin-top: 30px;
+}
+
+.voffset5 {
+  margin-top: 40px;
+}
+
+.voffset6 {
+  margin-top: 60px;
+}
+
+.voffset7 {
+  margin-top: 80px;
+}
+
+.voffset8 {
+  margin-top: 100px;
+}
+
+.voffset9 {
+  margin-top: 150px;
+}
+
+.hoffset {
+  margin-left: 2px;
+}
+
+.hoffset1 {
+  margin-left: 5px;
+}
+
+.hoffset2 {
+  margin-left: 10px;
+}
+
+.hoffset3 {
+  margin-left: 20px;
+}
+
+.list-no-style {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+ul.list-annotations {
+  list-style: none;
+  padding-left: 0.5em;
+
+  li {
+    &::before {
+      font-family: 'Glyphicons Halflings';
+      content: "\e041";
+      color: gray;
+      font-size: .7em;
+      display: inline-block;
+      margin-left: -1em;
+      width: 1em;
+    }
+    span {
+      padding-left: 0.2em;
+      display: inline-grid;
+    }
+  }
+}
+
+.height1 {
+  max-height: 100px;
+  overflow: auto;
+}
+
+.height2 {
+  max-height: 200px;
+  overflow: auto;
+}
+
+.height3 {
+  max-height: 300px;
+  overflow: auto;
+}
+
+.height4 {
+  max-height: 400px;
+  overflow: auto;
+}
+
+.inline {
+  display: inline;
+}
+
+.i-obiba-large {
+  font-size: large;
+}
+
+.i-obiba-x-large {
+  font-size: x-large;
+  vertical-align: bottom;
+}
+
+@network-color: #A8509E;
+@study-color: #1693c0;
+@study-color-active: #145E81;
+@dataset-color: #638f56;
+@variable-color: #9b315b;
+
+.color-network {
+  color: @network-color;
+}
+
+.color-study {
+  color: @study-color;
+}
+
+.color-dataset {
+  color: @dataset-color;
+}
+
+.color-variable {
+  color: @variable-color;
+}
+
+.btn-network {
+  background-color: @network-color;
+  color: white;
+}
+
+.btn-study {
+  background-color: @study-color;
+  color: white;
+}
+
+.btn-study.active {
+  background-color: @study-color-active;
+}
+
+.btn-dataset {
+  background-color: @dataset-color;
+  color: white;
+}
+
+.btn-variable {
+  background-color: @variable-color;
+  color: white;
+}
+
+.setPaginationTotal() {
+  font-weight: normal;
+  font-size: 13px;
+  background-color: transparent;
+  color: black;
+  text-decoration: none !important;
+  cursor: default !important;
+}
+
+.pagination > li > a.pagination-total {
+  .setPaginationTotal();
+
+  &:hover,
+  &:focus {
+    .setPaginationTotal();
+  }
+}
+
+.progress-bar.progress-bar-transparent {
+  background-color: transparent;
+}
+
+// TODO try to express these domain specific styles as standard bootstrap ones
+
+.tab-panel {
+  padding: 15px;
+  background-color: #fff;
+  border: 1px solid #ecf0f1;
+  border-top-color: transparent;
+  border-radius: 0 0 4px 4px;
+}
+
+.query-dropdown-menu {
+  min-width: 400px !important;
+}
+
+.criteria-list-item {
+  .list-no-style;
+  padding: 3px 20px !important;
+  color: #7b8a8b;
+
+  label {
+    font-weight: normal;
+  }
+}
+
+.criteria-list-terms {
+  max-height: 400px;
+  overflow: auto;
+}
+
+.list-search-widget .form-group {
+  width: 200px;
+}
+
+.agg-term-count {
+  font-weight: bold;
+  font-family: monospace;
+  font-size: 12px;
+  width: 30px;
+  color: #7b8a8b;
+}
+
+.agg-term-count-default {
+  .agg-term-count;
+  font-weight: normal;
+  color: rgba(123, 138, 139, 0.5);
+}
+
+.fullscreen() {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: #fff !important;
+  padding: 10px;
+}
+
+.can-full-screen:-webkit-full-screen {
+  .fullscreen;
+}
+
+.can-full-screen:-moz-full-screen {
+  .fullscreen;
+}
+
+.can-full-screen:-ms-fullscreen {
+  .fullscreen;
+}
+
+.can-full-screen:fullscreen {
+  .fullscreen;
+}
+
+.table-responsive-dropdown {
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+
+  span.btn-group {
+    white-space: nowrap !important;
+  }
+
+  a.dropdown-anchor {
+    cursor: pointer !important;
+    text-decoration: none !important;
+    padding-right: 15px;
+    box-shadow: none !important;
+    -moz-box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+
+    i.btn-large {
+      vertical-align: bottom;
+      font-size: 18px;
+    }
+  }
+}
+
+.mica-breadcrumb {
+  background: none !important;
+  padding: 0 0;
+}
+
+.table {
+  tr {
+    td.fit-content {
+      white-space: nowrap;
+      width: 1%;
+    }
+  }
+
+  tr.selected-row {
+    td {
+      background-color: #E9E9E9 !important;
+    }
+  }
+}
+
+.nav {
+  li > label.nav-label {
+    padding: 10px 0px;
+    color: #aaa;
+  }
+}
+
+.panel i[class*="fa"] {
+  display: inline-block;
+  width: 1.5em;
+  text-align: center;
+  font-weight: lighter;
+}
+
+.panel-title small {
+  color: inherit !important;
+}
+
+.no-border-radius {
+  border-radius: 0 !important;
+}
+
+.panel-heading {
+  background: @gray-lighter;
+}
+
+.panel.panel-taxonomy {
+  .panel {
+    border: 0;
+
+    .panel-heading {
+      background: #fafafa;
+    }
+  }
+
+  .panel-group .panel + .panel {
+    margin-top: 0px;
+  }
+}
+
+.panel-group {
+  .panel-group {
+    margin-bottom: 0;
+  }
+}
+
+@media print {
+  a[href]:after {
+    content: none !important;
+  }
+
+  label {
+    margin-right: 20px;
+  }
+
+  label + p, label + select {
+    display: inline-block;
+  }
+
+  label.radio-inline {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+
+    input:checked {
+      display: none;
+    }
+  }
+
+  .help-block {
+    display: none !important;
+  }
+}
+
+span.search-help {
+  background-color: #444240;
+  font-size: 30px;
+  line-height: 21px;
+}
+
+.obiba_mica_lists {
+  .caption-count {
+    position: absolute;
+    bottom: 0;
+  }
+}
+
+::-ms-clear {
+  display: none;
+}
+
+.no-pointer-events {
+  pointer-events: none !important;
+}
+
+.form-control-clear {
+  z-index: 100 !important;
+  pointer-events: all !important;
+  cursor: pointer !important;
+}
+
+meta-taxonomy-filter-panel {
+  .panel-group {
+    .panel {
+      border-radius: 0px !important;
+    }
+
+    meta-taxonomy-filter-list:first-child {
+      .panel-default {
+        border-top-left-radius: 4px !important;
+        border-top-right-radius: 4px !important;
+      }
+    }
+
+    meta-taxonomy-filter-list:last-child {
+      .panel-default {
+        border-bottom-left-radius: 4px !important;
+        border-bottom-right-radius: 4px !important;
+      }
+    }
+  }
+}
+
+.overlay-back-on {
+  display: inline;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  z-index: @overlay-background;
+}
+
+.overlay-front-on {
+  animation-duration: 1s;
+  animation-fill-mode: both;
+  position: relative;
+  z-index: @overlay-foreground;
+}
+
+.overlay-front-on-box-shodow {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.uib-datepicker {
+  .btn {
+    border-radius: 0px;
+  }
+}
+
+.alert.actions-select {
+  margin-top: 5px;
+  margin-bottom: -5px;
+  font-size: small;
+  min-height: 20px;
+  border-radius: 6px 6px 0 0;
+  padding: 5px;
+}
+
+.table-layout-fixed {
+
+  @media all and (min-width: 768px) {
+    table-layout: auto !important;
+  }
+
+  th, td {
+    overflow-wrap: break-word;
+  }
+
+  th.col-width-10 {
+    width: @table-layout-fixed-col-10 !important;
+  }
+
+  th.col-width-15 {
+    width: @table-layout-fixed-col-15 !important;
+  }
+
+  th.col-width-20 {
+    width: @table-layout-fixed-col-20 !important;
+  }
+
+  th.col-width-35 {
+    min-width: @table-layout-fixed-col-35 !important;
+  }
+
+  th.checkbox-width {
+    width: 2em;
+  }
+
+  overflow: auto !important;
+}
+
+.table-scroll table {
+  thead {
+    z-index: 1;
+  }
+
+  tbody {
+    z-index: -1;
+  }
+}

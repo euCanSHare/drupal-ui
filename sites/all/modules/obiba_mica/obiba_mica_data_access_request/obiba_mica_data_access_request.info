@@ -1,0 +1,18 @@
+name = "Obiba Mica Data Access"
+description = "Mica Client -- Data Access"
+package = Obiba
+core = 7.x
+
+dependencies[] = http_client
+dependencies[] = obiba_agate
+
+files[] = includes/obiba_mica_data_access_request.inc
+files[] = includes/obiba_mica_data_access_requests.inc
+files[] = includes/obiba_mica_data_access_request_comments.inc
+files[] = includes/obiba_mica_data_access_request_comment.inc
+
+; Information added by Drupal.org packaging script on 2020-06-03
+version = "7.x-41.0"
+core = "7.x"
+project = "obiba_mica"
+datestamp = "1591212174"

@@ -1,0 +1,9 @@
+<ol class="timeline">
+    <li class="timeline__step" ng-class="{ 'done': $ctrl.isDone(step) }" ng-style="{'width': $ctrl.stepWidth + '%'}" ng-repeat="step in $ctrl.steps">
+        <label class="timeline__step-label" ng-if="$ctrl.getContent(step)">
+            <span class="timeline__step-content">{{$ctrl.getContent(step) | translate}}</span>
+        </label>
+        <span class="timeline__step-title">{{step.title | translate}}</span>
+        <i class="timeline__step-marker">{{step.marker | translate}}</i>
+    </li>
+</ol>

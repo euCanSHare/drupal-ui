@@ -1,0 +1,37 @@
+<?php
+/**
+ * Copyright (c) 2018 OBiBa. All rights reserved.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * @file
+ * Code to perform installation operations
+ * */
+function obiba_mica_analysis_install() {
+  obiba_mica_analysis_create_node();
+  obiba_mica_analysis_default_users_access();
+}
+
+function obiba_mica_analysis_create_node() {
+  $my_body_content = '';
+  $node_page = obiba_mica_commons_add_page(st('Analysis'), st($my_body_content));
+  variable_set('obiba_mica_analysis_page', $node_page->nid);
+}
+
+function  obiba_mica_analysis_default_users_access(){
+  $permissions = array(
+  'can access analysis'
+  );
+  watchdog('Mica Client', 'Permission For   : @analysis  set to : anonymous (1), Authenticated',
+          array(
+            '@analysis' => 'can access analysis'
+          ), WATCHDOG_WARNING);
+  user_role_grant_permissions(DRUPAL_ANONYMOUS_RID, $permissions);
+  user_role_grant_permissions(DRUPAL_AUTHENTICATED_RID, $permissions);
+}

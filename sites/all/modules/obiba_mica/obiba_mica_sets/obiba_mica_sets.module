@@ -1,0 +1,224 @@
+<?php
+/**
+ * Copyright (c) 2018 OBiBa. All rights reserved.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * @file code for obiba_mica_sets module
+ */
+function obiba_mica_sets_menu() {
+  $items = array();
+
+  $items['admin/config/obiba-mica/obiba-mica-sets-settings'] = array(
+    'title' => 'Sets settings',
+    'description' => 'Configure Sets pages.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('obiba_mica_sets_admin_settings'),
+    'access arguments' => array('administer obiba mica'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'obiba_mica_sets.admin.inc',
+    'weight' => 3,
+  );
+
+  $items[ObibaSetsResources::MICA_SETS . '/%/sets/ws'] = array(
+    'page callback' => 'obiba_mica_sets_list_sets',
+    'file' => 'obiba_mica_sets_services.inc',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items[ObibaSetsResources::MICA_SETS . '/%/sets/_import/ws'] = array(
+    'page callback' => 'obiba_mica_sets_import',
+    'file' => 'obiba_mica_sets_services.inc',
+    'page arguments' => array(2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items[ObibaSetsResources::MICA_SETS . '/%/set/%/ws'] = array(
+    'page callback' => 'obiba_mica_sets_set',
+    'file' => 'obiba_mica_sets_services.inc',
+    'page arguments' => array(2, 4),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items[ObibaSetsResources::MICA_SETS . '/%/set/%/document/%/_exists/ws'] = array(
+    'page callback' => 'obiba_mica_sets_set_document_exists',
+    'file' => 'obiba_mica_sets_services.inc',
+    'page arguments' => array(2, 4, 6),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items[ObibaSetsResources::MICA_SETS . '/%/set/%/documents/_import/ws'] = array(
+    'page callback' => 'obiba_mica_sets_set_documents_import',
+    'file' => 'obiba_mica_sets_services.inc',
+    'page arguments' => array(2, 4),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items[ObibaSetsResources::MICA_SETS . '/%/set/%/documents/_rql/ws'] = array(
+    'page callback' => 'obiba_mica_sets_set_documents_import_query',
+    'file' => 'obiba_mica_sets_services.inc',
+    'page arguments' => array(2, 4),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items[ObibaSetsResources::MICA_SETS . '/%/set/%/documents/_opal/ws'] = array(
+    'page callback' => 'obiba_mica_sets_opal_views_download',
+    'file' => 'obiba_mica_sets_services.inc',
+    'page arguments' => array(2, 4),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items[ObibaSetsResources::MICA_SETS . '/%/set/%/documents/_delete/ws'] = array(
+    'page callback' => 'obiba_mica_sets_set_documents_remove',
+    'file' => 'obiba_mica_sets_services.inc',
+    'page arguments' => array(2, 4),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items[ObibaSetsResources::MICA_SETS . '/%/set/%/documents/%/%/ws'] = array(
+    'page callback' => 'obiba_mica_sets_set_documents_list',
+    'file' => 'obiba_mica_sets_services.inc',
+    'page arguments' => array(2, 4, 6, 7),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items[ObibaSetsResources::MICA_SETS . '/%/set/%/documents/ws'] = array(
+    'page callback' => 'obiba_mica_sets_set_documents_clear',
+    'file' => 'obiba_mica_sets_services.inc',
+    'page arguments' => array(2, 4),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_get_js().
+ */
+function obiba_mica_sets_get_js($weight_js) {
+  $current_path = current_path();
+  if ($current_path == MicaClientPathProvider::SETS || $current_path == MicaClientPathProvider::CART) {
+    $module_path = drupal_get_path('module', 'obiba_mica_sets');
+    $js = file_scan_directory($module_path . '/js/app', '/.*\.js$/', array('key' => 'name'));
+    ksort($js);
+    foreach ($js as $file_js) {
+      drupal_add_js($file_js->uri, array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => ++$weight_js,
+      ));
+    }
+  }
+  return ++$weight_js;
+}
+
+/**
+ * Implements hook_load_menus().
+ */
+function obiba_mica_sets_load_menus() {
+  $items = array();
+
+  $items[MicaClientPathProvider::CART] = array(
+    'access callback' => TRUE,
+    'title' => variable_get('cart_page_title', 'Cart'),
+    'module_caller' => 'obiba_mica_sets',
+    'type' => MENU_CALLBACK,
+    'options' => array('fragment' => 'cart'),
+  );
+
+  $items[MicaClientPathProvider::SETS] = array(
+    'access callback' => 'obiba_mica_sets_user_permission',
+    'title' => 'Lists',
+    'module_caller' => 'obiba_mica_sets',
+    'node_page' => !empty(variable_get_value('obiba_mica_sets_cart_page')) ? variable_get_value('obiba_mica_sets_lists_page') : NULL,
+    'menu_name' => 'main-menu',
+    'type' => MENU_NORMAL_ITEM,
+    'options' => array('fragment' => 'sets'),
+    'weight' => 11,
+  );
+
+  return $items;
+}
+
+/**
+ * Access entities count page callback
+ *
+ */
+function obiba_mica_sets_user_permission() {
+  return user_access('can access sets') && obiba_mica_commons_is_authorized_agate_user();
+}
+
+/**
+ * Implements hook_get_ng_module_to_load().
+ */
+function obiba_mica_sets_get_ng_module_to_load() {
+  $current_path = current_path();
+  if ($current_path == MicaClientPathProvider::SETS || $current_path == MicaClientPathProvider::CART) {
+    return 'mica.ObibaSets';
+  }
+  return FALSE;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function obiba_mica_sets_theme($existing, $type, $theme, $path) {
+  $path_template = $path . '/templates';
+  $path_views = $path . '/js/app/views';
+  return array(
+    'obiba_mica_sets_main_app' => array(
+      'template' => 'obiba_mica_sets_main_app',
+      'path' => $path_template,
+    ),
+    'obiba_mica_sets_cart-view-header' => array(
+      'template' => 'obiba_mica_sets_cart-view-header',
+      'path' => $path_views,
+    ),
+    'obiba_mica_sets_sets-view-header' => array(
+      'template' => 'obiba_mica_sets_sets-view-header',
+      'path' => $path_views,
+    ),
+  );
+
+}
+
+/**
+ * Main Sets page
+ */
+function obiba_mica_sets_variable_page_search() {
+  return theme('obiba_mica_sets_main_app', array());
+}
+
+
+function obiba_mica_sets_content_to_create() {
+  return array(
+    'obiba_mica_sets_cart_page' => array(
+      'content' => '',
+      'title' => 'Cart',
+    ),
+    'obiba_mica_sets_lists_page' => array(
+      'content' => '',
+      'title' => 'Lists',
+    ),
+  );
+}
+
+
+/**
+ * Implements hook_permission().
+ */
+function obiba_mica_sets_permission() {
+  return array(
+    'can access sets' => array(
+      'title' => t('Can create and manage lists'),
+      'description' => t('Only the selected roles can create and manage lists.'),
+    )
+  );
+}

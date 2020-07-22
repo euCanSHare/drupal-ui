@@ -1,0 +1,23 @@
+<div class="vocabulary-filter-detail" ng-class="{'close_right':$ctrl.classClose, 'overlay-front-on-box-shodow' : $ctrl.showTaxonomyPanel}">
+  
+  <div class="ng-clearfix"></div>
+
+  <vocabulary-filter-detail-heading show-taxonomy-panel="$ctrl.showTaxonomyPanel" taxonomy-name="$ctrl.taxonomyName" taxonomies-query="$ctrl.taxonomiesQuery"
+    clear-query="$ctrl.clearQuery" on-filter-change="$ctrl.onFilterChange(queryString)" taxonomy-type-map="$ctrl.taxonomyTypeMap"
+    result-tabs-order="$ctrl.resultTabsOrder" target="$ctrl.target" on-select-type="$ctrl.selectType(type)" result="$ctrl.result"
+    toggle-pannel="$ctrl.togglePannel()">
+  </vocabulary-filter-detail-heading>
+
+  <div class="vocabulary-filter-detail-container">
+    <vocabulary-filter-detail ng-if="!$ctrl.taxonomyIsArray" on-select-vocabulary-args="$ctrl.selectTaxonomyVocabularyArgs($ctrl.taxonomy, vocabulary, args)"
+      ng-repeat="vocabulary in $ctrl.filteredVocabularies track by $index" on-remove-criterion="$ctrl.removeCriterion(item)"
+      vocabulary="vocabulary">
+    </vocabulary-filter-detail>
+
+    <div ng-if="$ctrl.taxonomyIsArray" ng-repeat="subTaxonomy in $ctrl.taxonomy">
+      <taxonomy-filter-detail taxonomy="subTaxonomy" ng-if="$ctrl.filteredVocabularies[subTaxonomy.name]" vocabularies="$ctrl.filteredVocabularies[subTaxonomy.name]"
+        on-select-taxonomy-term="$ctrl.selectTaxonomyVocabularyArgs(taxonomy, vocabulary, args)" on-remove-criterion="$ctrl.removeCriterion(item)">
+      </taxonomy-filter-detail>
+    </div>
+  </div>
+</div>

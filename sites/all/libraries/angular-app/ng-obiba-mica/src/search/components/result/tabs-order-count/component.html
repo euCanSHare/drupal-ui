@@ -1,0 +1,19 @@
+<div>
+  <ul class="nav nav-pills pull-left voffset2" test-ref="search-counts">
+    <li role="presentation" ng-repeat="res in resultTabsOrder" ng-class="{active: activeTarget[targetTypeMap[res]].active && resultTabsOrder.length >= 1}"
+      ng-if="options[targetTypeMap[res]].showSearchTab" class="{{targetTypeMap[res]}}">
+      <a href ng-click="selectType(targetTypeMap[res])" ng-if="resultTabsOrder.length > 1">
+        {{targetTypeMap[res] | translate}}
+        <span class="badge hoffset1" test-ref="{{targetTypeMap[res]}}">
+          <small>{{getTotalHits(res) | localizedNumber}}</small>
+        </span>
+      </a>
+      <a href style="cursor: default;" ng-if="resultTabsOrder.length === 1">
+        {{targetTypeMap[res] | translate}}
+        <span class="badge hoffset1" test-ref="{{targetTypeMap[res]}}">
+          <small>{{getTotalHits(res) | localizedNumber}}</small>
+        </span>
+      </a>
+    </li>
+  </ul>
+</div>

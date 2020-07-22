@@ -1,0 +1,15 @@
+<div class="modal-header">
+  <h4 class="modal-title">
+    <i class="fa fa-exclamation-triangle"></i>
+    {{'data-access-request.action-log.delete.title' | translate}}
+  </h4>
+</div>
+
+<div class="modal-body">
+  {{'data-access-request.action-log.delete.message' | translate:$modal.item}}
+</div>
+
+<div class="modal-footer">
+  <button class="btn btn-responsive btn-default" type="button" ng-click="$dismiss()" translate>cancel</button>
+  <button class="btn btn-responsive btn-primary" type="button" ng-click="$close()" translate>ok</button>
+</div>

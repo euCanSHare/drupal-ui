@@ -1,0 +1,100 @@
+<?php
+/**
+ * Copyright (c) 2018 OBiBa. All rights reserved.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+use Obiba\ObibaMicaClient\MicaClient\DrupalMicaClient as DrupalMicaClient;
+
+class ObibaMicaDashBoardBlock {
+  const ID = 'obiba_mica_dashboard';
+}
+
+/**
+ * Implements hook_theme().
+ *
+ * copy '<modules>/obiba_mica_dashboard/templates/'   files in  your customized
+ * theme  '<YOUR_THEME>/templates/' path you can modify default display of
+ * listed page templates by rearrange block field for example don't forget to
+ * clear the theme registry.
+ *
+ */
+function obiba_mica_dashboard_theme($existing, $type, $theme, $path)
+{
+  $path_theme = $path . '/templates';
+  return array(
+    ObibaMicaDashBoardBlock::ID => array(
+      'template' => 'obiba_mica_dashboard',
+      'path' => $path_theme
+    )
+  );
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function obiba_mica_dashboard_block_info() {
+  return array(
+    ObibaMicaDashBoardBlock::ID => array(
+      'info' => t('Mica Dashboard'),
+      'region' => 'content',
+      'visibility' => BLOCK_VISIBILITY_LISTED,
+      'pages' => '<front>',
+      'weight' => -10,
+    )
+  );
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function obiba_mica_dashboard_block_view($delta = '')
+{
+  $block = array();
+
+  if (ObibaMicaDashBoardBlock::ID === $delta) {
+    $block['content'] = _obiba_mica_dashboard_get_metrics();
+  }
+
+  return $block;
+}
+
+function _obiba_mica_dashboard_get_metrics() {
+  $metricsResource = new MicaMetricsResource();
+  $metrics = $metricsResource->getMetrics();
+  if (!empty($metrics)) {
+    return theme('obiba_mica_dashboard', array('metrics' => MicaMetricsHelper::formatAsMap($metrics)));
+  }
+
+  return FALSE;
+}
+
+function _obiba_mica_dashboard_repository_link() {
+  global $base_url;
+  return $base_url . "/" . ObibaSearchResources::MICA_REPOSITORY . "#/search";
+}
+
+function obiba_mica_dashboard_repository_study_query_link($className, $type = "studies") {
+  return _obiba_mica_dashboard_repository_link() . "?query=" .
+    DrupalMicaClient\RqlQueryBuilder::study_query(DrupalMicaClient\RqlQueryBuilder::className_query("Mica_study", $className)) .
+    "&type=$type";
+}
+
+function obiba_mica_dashboard_repository_network_query_link() {
+  return _obiba_mica_dashboard_repository_link() . "?query=" .
+    DrupalMicaClient\RqlQueryBuilder::network_query(DrupalMicaClient\RqlQueryBuilder::exists_query("Mica_network", "id")) .
+    "&type=networks";
+}
+
+function obiba_mica_dashboard_repository_variable_query_link($variableType, $className, $type = "variables") {
+  return _obiba_mica_dashboard_repository_link() . "?query=" .
+    DrupalMicaClient\RqlQueryBuilder::variable_query(DrupalMicaClient\RqlQueryBuilder::in_query("Mica_variable", "variableType", $variableType)) .
+    DrupalMicaClient\RqlQueryBuilder::study_query(DrupalMicaClient\RqlQueryBuilder::className_query("Mica_study", $className)) .
+    "&type=$type";
+}
+

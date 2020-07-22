@@ -1,0 +1,277 @@
+<?php
+/**
+ * Copyright (c) 2018 OBiBa. All rights reserved.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * @file
+ * Mica studies file
+ */
+
+include_once('obiba_mica_study_admin_form.inc');
+include_once('includes/obiba_mica_study_resource.inc');
+
+function obiba_mica_study_menu() {
+  $items = array();
+  $items['mica/' . DrupalMicaStudyResource::INDIVIDUAL_STUDY . '/%/networks'] = array(
+    'page callback' => 'obiba_mica_study_page_detail_networks',
+    'file' => 'obiba_mica_study-page-detail.inc',
+    'access callback' => TRUE,
+    'page arguments' => array(2),
+  );
+
+  $items['mica/' . DrupalMicaStudyResource::INDIVIDUAL_STUDY . '/%/datasets'] = array(
+    'page callback' => 'obiba_mica_study_page_detail_datasets',
+    'file' => 'obiba_mica_study-page-detail.inc',
+    'access callback' => TRUE,
+    'page arguments' => array(2),
+  );
+
+  $items['mica/' . DrupalMicaStudyResource::INDIVIDUAL_STUDY . '/%'] = array(
+    'title' => 'Mica study detail',
+    'page callback' => 'obiba_mica_study_page_detail',
+    'file' => 'obiba_mica_study-page-detail.inc',
+    'access callback' => 'obiba_mica_study_access_page',
+    'access arguments' => array('1'),
+    'page arguments' => array(2),
+  );
+
+  $items['mica/' . DrupalMicaStudyResource::INDIVIDUAL_STUDY . '/%/draft/%'] = array(
+    'title' => 'Mica study detail',
+    'page callback' => 'obiba_mica_study_page_detail',
+    'file' => 'obiba_mica_study-page-detail.inc',
+    'access callback' => 'obiba_mica_study_access_page',
+    'access arguments' => array('1'),
+    'page arguments' => array(2, 4),
+  );
+
+  /***********Harmonization Studies*********************/
+
+  $items['mica/' . DrupalMicaStudyResource::HARMONIZATION_STUDY . '/%'] = array(
+    'title' => 'Mica Harmomization study detail',
+    'page callback' => 'obiba_mica_study_harmonization_page_detail',
+    'file' => 'obiba_mica_study_hamonization_study-detail.inc',
+    'access callback' => 'obiba_mica_study_access_page',
+    'access arguments' => array('1'),
+    'page arguments' => array(2),
+  );
+
+  $items['mica/' . DrupalMicaStudyResource::HARMONIZATION_STUDY . '/%/draft/%'] = array(
+    'title' => 'Mica Harmomization study detail',
+    'page callback' => 'obiba_mica_study_harmonization_page_detail',
+    'file' => 'obiba_mica_study_hamonization_study-detail.inc',
+    'access callback' => 'obiba_mica_study_access_page',
+    'access arguments' => array('1'),
+    'page arguments' => array(2, 4),
+  );
+
+  $items['mica/' . DrupalMicaStudyResource::HARMONIZATION_STUDY . '/%/networks'] = array(
+    'page callback' => 'obiba_mica_study_page_detail_networks',
+    'file' => 'obiba_mica_study-page-detail.inc',
+    'access callback' => TRUE,
+    'page arguments' => array(2),
+  );
+
+  $items['mica/' . DrupalMicaStudyResource::HARMONIZATION_STUDY . '/%/datasets'] = array(
+    'page callback' => 'obiba_mica_study_page_detail_datasets',
+    'file' => 'obiba_mica_study-page-detail.inc',
+    'access callback' => TRUE,
+    'page arguments' => array(2),
+  );
+  /*****************************************************/
+
+  $items['mica/ng/coverage/%/%'] = array(
+    'page callback' => 'obiba_mica_study_ng_coverage',
+    'file' => 'obiba_mica_study-page-detail.inc',
+    'access callback' => TRUE,
+    'page arguments' => array(3,4),
+  );
+
+  return $items;
+}
+
+/**
+ * Access Studies list/Study page callback
+ *
+ */
+function obiba_mica_study_access_page() {
+  if (module_exists('content_access')) {
+    global $user;
+    foreach($user->roles as $id_role=>$role){
+    $node = node_load(variable_get_value('study_list_page'));
+    $accepted_roles = content_access_per_node_setting('view', $node);
+    return in_array($id_role, $accepted_roles);
+    }
+  }
+  return TRUE;
+}
+
+/**
+ * Implements hook_theme().
+ *
+ * copy '<modules>/obiba_mica_study/templates/'   files in  yor customized theme  '<YOUR_THEME>/templates/' path
+ * you can modify default display of listed page templates by rearrange block field for example
+ * don't forget to clear the theme registry.
+ *
+ */
+
+function obiba_mica_study_theme($existing, $type, $theme, $path) {
+  $path_theme = $path . '/templates';
+  return array(
+    'obiba_mica_study_detail' => array(
+      'template' => 'obiba_mica_study-detail',
+      'path' => $path_theme . '/study-detail'
+    ),
+    'obiba_mica_study-detail-members' => array(
+      'template' => 'obiba_mica_study-detail-members',
+      'path' => $path_theme . '/study-detail'
+    ),
+    'obiba_mica_study_harmonization_study-detail' => array(
+      'template' => 'obiba_mica_study_harmonization_study-detail',
+      'path' => $path_theme . '/study-detail'
+    ),
+    'obiba_mica_study_harmonization_study-detail-members' => array(
+      'template' => 'obiba_mica_study_harmonization_study-detail-members',
+      'path' => $path_theme . '/study-detail'
+    ),
+    'obiba_mica_study_detail_coverage' => array(
+      'template' => 'obiba_mica_study_detail_coverage',
+      'path' => $path_theme
+    ),
+    'obiba_mica_study_detail_networks' => array(
+      'template' => 'obiba_mica_study_detail_networks',
+      'path' => $path_theme
+    ),
+    'obiba_mica_study_detail_datasets' => array(
+      'template' => 'obiba_mica_study_detail_datasets',
+      'path' => $path_theme
+    ),
+    'mica_population_detail' => array('template' => 'obiba_mica_study-population-detail', 'path' => $path_theme),
+    'mica_population_content_detail' => array(
+      'template' => 'obiba_mica_study-population-content-detail',
+      'path' => $path_theme
+    ),
+    'mica_population_content_detail_modal' => array(
+      'template' => 'obiba_mica_study-population-content-detail-modal',
+      'path' => $path_theme
+    ),
+    'obiba_mica_study_dce_detail_modal' => array('template' => 'obiba_mica_study_dce-detail-modal', 'path' => $path_theme),
+    'obiba_mica_study_opal' => array('template' => 'obiba_mica_study_opal', 'path' => $path_theme),
+    'obiba_mica_study_fixed_sidebar' => array('template' => 'obiba_mica_study_fixed_sidebar', 'path' => $path_theme),
+    'obiba_mica_study-detail-access' => array(
+      'template' => 'obiba_mica_study-detail-access',
+      'path' => $path_theme . '/study-detail'
+    ),
+    'obiba_mica_access_representative_modal' => array(
+      'template' => 'obiba_mica_access_representative_modal',
+      'path' => $path_theme . '/study-detail'
+    ),
+  );
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function obiba_mica_study_block_info() {
+  $blocks['studies-tab-list'] = array(
+    'info' => t('Studies list'),
+    'title' => '',
+    'status' => 1,
+    'region' => 'content',
+    'visibility' => BLOCK_VISIBILITY_LISTED,
+    'pages' => '*' . DrupalMicaStudyResource::STUDIES,
+    'weight' => 3,
+    'custom' => 1,
+  );
+  return $blocks;
+}
+
+/**
+ * @param $gender_val
+ *
+ * @return text value gender
+ */
+function obiba_mica_study_get_gender($gender_val) {
+
+  if ($gender_val === 1 || $gender_val === 'women') {
+    return t('Women only');
+  } elseif ($gender_val === 0 || $gender_val === 'men') {
+    return t('Men only');
+  }
+}
+
+function obiba_mica_study_get_dce_property($dce, $property, $default) {
+  if (isset($dce['data']) && isset($dce['data'][$property])) {
+    return $dce['data'][$property];
+  }
+  if (isset($dce[$property])) {
+    return $dce[$property];
+  }
+  return $default;
+}
+
+function obiba_mica_study_sort_dce($x, $y) {
+  $x_start = obiba_mica_commons_convert_to_month(
+    obiba_mica_study_get_dce_property($x, 'start_year', 0),
+    obiba_mica_study_get_dce_property($x, 'start_month', 0));
+
+  $y_start = obiba_mica_commons_convert_to_month(
+    obiba_mica_study_get_dce_property($y, 'start_year', 0),
+    obiba_mica_study_get_dce_property($y, 'start_month', 0));
+
+  if ($x_start === $y_start) {
+    $x_end = obiba_mica_commons_convert_to_month(
+      obiba_mica_study_get_dce_property($x, 'end_year', 0),
+      obiba_mica_study_get_dce_property($x, 'end_month', 0));
+
+    $y_end = obiba_mica_commons_convert_to_month(
+      obiba_mica_study_get_dce_property($y, 'end_year', 0),
+      obiba_mica_study_get_dce_property($y, 'end_month', 0));
+
+    if ($x_end === $y_end) {
+      $x_created = obiba_mica_study_get_dce_property($x, 'created', 0);
+      $y_created = obiba_mica_study_get_dce_property($y, 'created', 0);
+      if ($x_created === $y_created) {
+        return 0;
+      }
+      return $x_created < $y_created ? -1 : 1;
+    }
+    return $x_end < $y_end ? -1 : 1;
+  }
+  return $x_start < $y_start ? -1 : 1;
+}
+
+function obiba_mica_study_load_libs() {
+  $module_path_ = drupal_get_path('module', 'obiba_mica_commons');
+  drupal_add_js($module_path_ . '/js/obiba-mica-commons-affix.js');
+}
+
+/**
+ * Translate the study design in studies summary.
+ *
+ * @param string $study_design
+ *   A given design key to translate.
+ *
+ * @return string
+ *   A Translated design term.
+ */
+function obiba_mica_study_translate_study_design_summary($study_design) {
+  $localize = obiba_mica_commons_mica_server_localisation();
+  if (empty($study_design)) {
+    return $study_design;
+  }
+  return $localize->getTranslation("study_taxonomy.vocabulary.methods-design.term." . $study_design . ".title");
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function obiba_mica_study_form_obiba_mica_content_pages_admin_settings_alter(&$form, &$form_state, $form_id) {
+  obiba_mica_study_settings_admin_content($form);
+}

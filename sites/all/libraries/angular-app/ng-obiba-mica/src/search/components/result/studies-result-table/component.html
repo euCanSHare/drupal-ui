@@ -1,0 +1,136 @@
+<div>
+  <div ng-if="loading" class="loading"></div>
+  <div ng-show="!loading">
+    <p class="help-block" ng-if="!summaries || !summaries.length" translate>search.study.noResults</p>
+    <div class="table-responsive" ng-if="summaries && summaries.length">
+      <table class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th rowspan="2" translate>acronym</th>
+            <th rowspan="2" translate>name</th>
+            <th rowspan="2" translate ng-if="choseAll && optionsCols.showStudiesTypeColumn">type</th>
+            <th rowspan="2" translate ng-if="optionsCols.showStudiesDesignColumn && choseIndividual">search.study.design</th>
+            <th translate ng-attr-colspan="{{optionsCols.showStudiesQuestionnaireColumn + optionsCols.showStudiesPmColumn + optionsCols.showStudiesBioColumn + optionsCols.showStudiesOtherColumn}}"
+              ng-if="(optionsCols.showStudiesQuestionnaireColumn || optionsCols.showStudiesPmColumn || optionsCols.showStudiesBioColumn || optionsCols.showStudiesOtherColumn) && choseIndividual">
+              search.study.dataSources
+            </th>
+            <th rowspan="2" translate ng-if="optionsCols.showStudiesParticipantsColumn && choseIndividual">search.study.participants</th>
+            <th rowspan="2" translate ng-if="optionsCols.showStudiesNetworksColumn">networks</th>
+            <th rowspan="2" translate ng-if="optionsCols.showStudiesVariablesColumn">variables</th>
+            <th translate ng-attr-colspan="{{(optionsCols.showStudiesStudyDatasetsColumn && choseIndividual) + (optionsCols.showStudiesHarmonizationDatasetsColumn && choseHarmonization)}}"
+              ng-if="(optionsCols.showStudiesStudyDatasetsColumn || optionsCols.showStudiesHarmonizationDatasetsColumn)">datasets
+            </th>
+            <th translate ng-attr-colspan="{{(optionsCols.showStudiesStudyVariablesColumn && choseIndividual) + (optionsCols.showStudiesDataschemaVariablesColumn && choseHarmonization)}}"
+              ng-if="(optionsCols.showStudiesStudyVariablesColumn || optionsCols.showStudiesDataschemaVariablesColumn)">variables</th>
+          </tr>
+          <tr>
+            <th class="text-nowrap" title="{{datasourceTitles.questionnaires.title}}" ng-if="optionsCols.showStudiesQuestionnaireColumn && choseIndividual">
+              <i class="fa fa-file-text-o"></i>
+            </th>
+            <th class="text-nowrap" title="{{datasourceTitles.physical_measures.title}}" ng-if="optionsCols.showStudiesPmColumn && choseIndividual">
+              <i class="fa fa-stethoscope"></i>
+            </th>
+            <th class="text-nowrap" title="{{datasourceTitles.biological_samples.title}}" ng-if="optionsCols.showStudiesBioColumn && choseIndividual">
+              <i class="fa fa-flask"></i>
+            </th>
+            <th class="text-nowrap" title="{{datasourceTitles.others.title}}" ng-if="optionsCols.showStudiesOtherColumn && choseIndividual">
+              <i class="fa fa-plus-square-o"></i>
+            </th>
+            <th translate ng-if="optionsCols.showStudiesStudyDatasetsColumn && choseIndividual">search.coverage-buckets.collection</th>
+            <th translate ng-if="optionsCols.showStudiesHarmonizationDatasetsColumn && choseHarmonization">search.coverage-buckets.harmonization</th>
+            <th translate ng-if="optionsCols.showStudiesStudyVariablesColumn && choseIndividual">search.coverage-buckets.collection</th>
+            <th translate ng-if="optionsCols.showStudiesDataschemaVariablesColumn && choseHarmonization">search.coverage-buckets.harmonization</th>
+          </tr>
+        </thead>
+        <tbody test-ref="search-results">
+          <tr ng-repeat="summary in summaries" ng-init="lang = $parent.$parent.lang">
+            <td>
+              <a ng-href="{{PageUrlService.studyPage(summary.id, summary.studyResourcePath === 'harmonization-study' ? 'harmonization' : 'individual')}}">
+                <localized value="summary.acronym" lang="lang" test-ref="acronym"></localized>
+              </a>
+            </td>
+            <td>
+              <localized value="summary.name" lang="lang"></localized>
+            </td>
+            <td ng-if="choseAll && optionsCols.showStudiesTypeColumn">{{(summary.studyResourcePath === 'individual-study' ? 'search.study.individual' : 'search.study.harmonization')
+              | translate}}</td>
+            <td ng-if="optionsCols.showStudiesDesignColumn && choseIndividual">
+              {{ summary.design === undefined ? '-' : 'study_taxonomy.vocabulary.methods-design.term.' + summary.design + '.title' | translate}}
+            </td>
+            <td ng-if="optionsCols.showStudiesQuestionnaireColumn && choseIndividual">
+              <i class="fa fa-check" ng-if="hasDatasource(summary.dataSources, 'questionnaires')"></i>
+              <span ng-if="!hasDatasource(summary.dataSources, 'questionnaires')">-</span>
+            </td>
+            <td ng-if="optionsCols.showStudiesPmColumn && choseIndividual">
+              <i class="fa fa-check" ng-if="hasDatasource(summary.dataSources, 'physical_measures')"></i>
+              <span ng-if="!hasDatasource(summary.dataSources, 'physical_measures')">-</span>
+            </td>
+            <td ng-if="optionsCols.showStudiesBioColumn && choseIndividual">
+              <i class="fa fa-check" ng-if="hasDatasource(summary.dataSources, 'biological_samples')"></i>
+              <span ng-if="!hasDatasource(summary.dataSources, 'biological_samples')">-</span>
+            </td>
+            <td ng-if="optionsCols.showStudiesOtherColumn && choseIndividual">
+              <i class="fa fa-check" ng-if="hasDatasource(summary.dataSources, 'others')"></i>
+              <span ng-if="!hasDatasource(summary.dataSources, 'others')">-</span>
+            </td>
+            <td ng-if="optionsCols.showStudiesParticipantsColumn && choseIndividual">
+              <span ng-if="summary.targetNumber.number">
+                <localized-number value="summary.targetNumber.number"></localized-number>
+              </span>
+              <span translate ng-if="summary.targetNumber.noLimit">
+                numberOfParticipants.no-limit
+              </span>
+              <span ng-if="!summary.targetNumber.number && !summary.targetNumber.noLimit">-</span>
+            </td>
+            <td ng-if="optionsCols.showStudiesNetworksColumn">
+              <cell-stat-value ng-if="summary['obiba.mica.CountStatsDto.studyCountStats'].networks"
+                               result-tab-order="resultTabOrder"
+                               destination-tab="network"
+                               entity-count="summary['obiba.mica.CountStatsDto.studyCountStats'].networks"
+                               update-criteria="updateCriteria(summary.id, 'networks')"></cell-stat-value>
+              <span ng-if="!summary['obiba.mica.CountStatsDto.studyCountStats'].networks">-</span>
+            </td>
+            <td ng-if="optionsCols.showStudiesVariablesColumn">
+              <cell-stat-value result-tab-order="resultTabOrder"
+                               destination-tab="variable"
+                               entity-count="summary['obiba.mica.CountStatsDto.studyCountStats'].variables"
+                               update-criteria="updateCriteria(summary.id, 'variables')"></cell-stat-value>
+            </td>
+            <td ng-if="optionsCols.showStudiesStudyDatasetsColumn && choseIndividual">
+              <cell-stat-value ng-if="summary['obiba.mica.CountStatsDto.studyCountStats'].studyDatasets"
+                               result-tab-order="resultTabOrder"
+                               destination-tab="dataset"
+                               entity-count="summary['obiba.mica.CountStatsDto.studyCountStats'].studyDatasets"
+                               update-criteria="updateCriteria(summary.id, 'Study', 'datasets')"></cell-stat-value>
+              <span ng-if="!summary['obiba.mica.CountStatsDto.studyCountStats'].studyDatasets">-</span>
+            </td>
+            <td ng-if="optionsCols.showStudiesHarmonizationDatasetsColumn && choseHarmonization">
+              <cell-stat-value ng-if="summary['obiba.mica.CountStatsDto.studyCountStats'].harmonizationDatasets"
+                               result-tab-order="resultTabOrder"
+                               destination-tab="dataset"
+                               entity-count="summary['obiba.mica.CountStatsDto.studyCountStats'].harmonizationDatasets"
+                               update-criteria="updateCriteria(summary.id, 'HarmonizationStudy', 'datasets')"></cell-stat-value>
+              <span ng-if="!summary['obiba.mica.CountStatsDto.studyCountStats'].harmonizationDatasets">-</span>
+            </td>
+            <td ng-if="optionsCols.showStudiesStudyVariablesColumn && choseIndividual">
+              <cell-stat-value ng-if="summary['obiba.mica.CountStatsDto.studyCountStats'].studyDatasets"
+                               result-tab-order="resultTabOrder"
+                               destination-tab="variable"
+                               entity-count="summary['obiba.mica.CountStatsDto.studyCountStats'].studyVariables"
+                               update-criteria="updateCriteria(summary.id, 'Study', 'variables')"></cell-stat-value>
+              <span ng-if="!summary['obiba.mica.CountStatsDto.studyCountStats'].studyDatasets">-</span>
+            </td>
+            <td ng-if="optionsCols.showStudiesDataschemaVariablesColumn && choseHarmonization">
+              <cell-stat-value ng-if="summary['obiba.mica.CountStatsDto.studyCountStats'].harmonizationDatasets"
+                               result-tab-order="resultTabOrder"
+                               destination-tab="variable"
+                               entity-count="summary['obiba.mica.CountStatsDto.studyCountStats'].dataschemaVariables"
+                               update-criteria="updateCriteria(summary.id, 'HarmonizationStudy', 'variables')"></cell-stat-value>
+              <span ng-if="!summary['obiba.mica.CountStatsDto.studyCountStats'].harmonizationDatasets">-</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,29 @@
+<div class="form-group"
+     ng-controller="RadioGroupCollectionController"
+     ng-class="{'has-error': form.disableErrorState !== true && hasError(),
+                'has-success': form.disableSuccessState !== true && hasSuccess(),
+                'has-feedback': form.feedback !== false }"
+     sf-field-model
+     schema-validate="form" >
+  <label ng-if="showTitle()">{{showTitle()}}</label>
+  <div ng-repeat="item in form.schema.items">
+    <div class="row" ng-if="!form.checkboxMode">
+      <div class="col-xs-6">
+        <span class="control-label" ng-bind-html="item.name"></span>
+      </div>
+      <div class="col-xs-6">
+        <label class="radio-inline" ng-repeat="transformedValue in transformedValues">
+          <input type="radio" ng-model="model[key][item.key]" name="{{key + '.' + item.key}}" id="inlineRadio{{$index}}" value="{{transformedValue.key}}"> {{transformedValue.caption}}
+        </label>
+      </div>
+    </div>
+
+    <div ng-if="form.checkboxMode">
+        <label class="checkbox-inline">
+          <input type="checkbox" ng-model="model[key][item.key]" name="{{key + '.' + item.key}}" id="checkbox{{$index}}" value="{{item.key}}">
+          <span ng-bind-html="item.name"></span>
+        </label>
+    </div>
+  </div>
+  <span class="help-block" sf-message="form.description"></span>
+</div>

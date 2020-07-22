@@ -1,0 +1,5 @@
+name = CustomerICare Live Chat
+description = Livechat by CustomerICare. The Drupal module is a free application to chat with visitors on your website. The plugin adds a beautiful live chat box that allows text, audio and video, sending files plus web analytics.
+core = 7.x
+version = 1.0.0
+package = Chat

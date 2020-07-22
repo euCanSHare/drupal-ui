@@ -1,0 +1,76 @@
+<div>
+  <div ng-if="loading" class="loading"></div>
+  <div ng-show="!loading">
+    <p class="help-block" ng-if="!summaries || !summaries.length" translate>search.variable.noResults</p>
+    <div class="table-responsive" ng-if="summaries && summaries.length">
+      <table-alert-header all-selected="page.all" on-select-all="selectAll()" ng-show="page.selections[pagination.currentPage]"></table-alert-header>
+      <table class="table table-bordered table-striped table-layout-fixed" ng-init="lang = $parent.$parent.lang">
+        <thead>
+          <tr>
+            <th class="checkbox-width">
+              <input
+                      ng-model="page.selections[pagination.currentPage]"
+                      type="checkbox"
+                      ng-click="selectPage()"/>
+            </th>
+            <th ng-class="{'col-width-20': annotationsEnabled, 'col-width-35': !annotationsEnabled}" translate>name</th>
+            <th ng-class="{'col-width-20': annotationsEnabled, 'col-width-35': !annotationsEnabled}" translate>search.variable.label</th>
+            <th ng-if="annotationsEnabled" class="col-width-20">Annotations</th>
+            <th class="col-width-10" translate ng-if="optionsCols.showVariablesTypeColumn">type</th>
+            <th class="col-width-10" translate ng-if="optionsCols.showVariablesStudiesColumn">search.study.label</th>
+            <th class="col-width-10" translate ng-if="optionsCols.showVariablesStudiesColumn">search.study.population-name</th>
+            <th class="col-width-10" translate ng-if="optionsCols.showVariablesStudiesColumn">search.study.dce-name</th>
+            <th class="col-width-15" translate ng-if="optionsCols.showVariablesDatasetsColumn">search.dataset.label</th>
+          </tr>
+        </thead>
+        <tbody test-ref="search-results">
+          <tr ng-repeat="summary in summaries">
+            <td>
+              <input ng-model="selections[summary.id]" type="checkbox" ng-click="select(summary.id)"/>
+            </td>
+            <td>
+              <a test-ref="name" href="{{PageUrlService.variablePage(summary.id) ? PageUrlService.variablePage(summary.id) : PageUrlService.datasetPage(summary.datasetId, summary.variableType)}}">
+                {{summary.name}}
+              </a>
+            </td>
+            <td>
+              <localized value="summary.variableLabel" lang="lang"></localized>
+            </td>
+            <td ng-if="annotationsEnabled">
+              <ul class="list-annotations">
+                <li ng-repeat="annotation in summary.annotations | orderBy:'index'"><span>{{annotation.title}}</span></li>
+              </ul>
+            </td>
+            <td ng-if="optionsCols.showVariablesTypeColumn">
+              {{'search.variable.' + summary.variableType.toLowerCase() | translate}}
+            </td>
+            <td ng-if="optionsCols.showVariablesStudiesColumn">
+              <a ng-if="summary.studyId" ng-href="{{PageUrlService.studyPage(summary.studyId, summary.variableType == 'Dataschema' ? 'harmonization' : 'individual')}}">
+                <localized value="summary.studyAcronym" lang="lang"></localized>
+              </a>
+              <a ng-if="summary.networkId" ng-href="{{PageUrlService.networkPage(summary.networkId)}}">
+                <localized value="summary.networkAcronym" lang="lang"></localized>
+              </a>
+            </td>
+            <td ng-if="optionsCols.showVariablesStudiesColumn && populationColumn">
+              <a ng-if="summary.populationName" ng-href="{{PageUrlService.studyPopulationPage(summary.studyId, summary.variableType == 'Dataschema' ? 'harmonization' : 'individual', summary.populationId, true)}}">
+                <localized value="summary.populationName" lang="lang"></localized>
+              </a>
+            </td>
+            <td ng-if="optionsCols.showVariablesStudiesColumn && dceColumn">
+              <a ng-if="summary.dceName" ng-href="{{PageUrlService.StudyDcePage(summary.studyId, summary.variableType == 'Dataschema' ? 'harmonization' : 'individual', summary.dceId)}}">
+                <localized value="summary.dceName" lang="lang"></localized>
+              </a>
+              <span ng-if="!summary.dceName">-</span>
+            </td>
+            <td ng-if="optionsCols.showVariablesDatasetsColumn">
+              <a ng-href="{{PageUrlService.datasetPage(summary.datasetId, summary.variableType)}}">
+                <localized value="summary.datasetAcronym" lang="lang"></localized>
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

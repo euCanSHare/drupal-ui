@@ -1,0 +1,87 @@
+<!--
+  ~ Copyright (c) 2018 OBiBa. All rights reserved.
+  ~
+  ~ This program and the accompanying materials
+  ~ are made available under the terms of the GNU Public License v3.0.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<div ng-show="inSearchMode()" class="can-full-screen"  fullscreen="isFullscreen">
+  <!-- Search criteria region -->
+  <search-criteria-region options="options" search="search"></search-criteria-region>
+
+  <buttons-panel-component
+    on-toggle-fullscreen="toggleFullscreen(fullscreen)"
+    on-toggle-left-panel-visibility="toggleLeftPanelVisibility(visible)">
+  </buttons-panel-component>
+
+  <div ng-class="{'overlay-back-on': search.showTaxonomyPanel}">
+  </div>
+  <div ng-class="{'overlay-front-on': search.showTaxonomyPanel}">
+    <div class="row voffset1">
+      <div class="col-md-3" ng-if="hasFacetedTaxonomies && showLeftPanel">
+        <!-- Search Facets region -->
+        <taxonomies-facets-panel id="search-facets-region" faceted-taxonomies="facetedTaxonomies"
+                                criteria="search.criteria" on-select-term="onSelectTerm"
+                                on-refresh="refreshQuery" lang="lang"></taxonomies-facets-panel>
+      </div>
+      <div class="col-sm-12 col-lg-3" ng-if="!hasFacetedTaxonomies && showLeftPanel">
+        <!-- Search Facets region -->
+        <meta-taxonomy-filter-panel
+            show-taxonomy-panel="search.showTaxonomyPanel"
+            tabs="targetTabsOrder"
+            rql-query="search.rqlQuery"
+            on-toggle="onTaxonomyFilterPanelToggleVisibility(target, taxonomy)"></meta-taxonomy-filter-panel>
+      </div>
+      <div class="col-sm-12" ng-class="{'col-lg-9': showLeftPanel, 'col-lg-12': !showLeftPanel}">
+        <!-- Search Results region -->
+        <div class="panel panel-default" ng-if="search.showTaxonomyPanel">
+          <taxonomy-filter-panel
+              show-taxonomy-panel="search.showTaxonomyPanel"
+              result-tabs-order="resultTabsOrder"
+              taxonomy-type-map="taxonomyTypeMap"
+              result="search.countResult"
+              target="search.selectedTarget"
+              taxonomy="search.selectedTaxonomy"
+              on-select-type="onTypeChanged(type)"
+              on-select-term="onSelectTerm(target, taxonomy, vocabulary, args)"
+              on-remove-criterion="removeCriteriaItem(item)"
+              on-toggle="onTaxonomyFilterPanelToggleVisibility"></taxonomy-filter-panel>
+        </div>
+        <div class="clearfix"></div>
+        <div id="search-result-region"
+            ng-if="!search.showTaxonomyPanel && canExecuteWithEmptyQuery()">
+          <div ng-if="searchTabsOrder.length > 1">
+            <ul class="nav nav-tabs">
+              <li role="presentation" ng-repeat="tab in searchTabsOrder"
+                  ng-class="{active: search.display === tab}">
+                <a href ng-click="selectDisplay(tab)">{{ 'search.' + tab | translate}}</a>
+              </li>
+            </ul>
+          </div>
+          <div translate>{{'search.' + search.display + '-help'}}</div>
+          <result-panel display="search.display"
+                        type="search.type"
+                        bucket="search.bucket"
+                        criteria="search.criteria"
+                        query="search.executedQuery"
+                        result="search.result"
+                        loading="search.loading"
+                        pagination="search.pagination"
+                        on-update-criteria="onUpdateCriteria"
+                        on-remove-criteria="onRemoveCriteria"
+                        on-type-changed="onTypeChanged"
+                        on-bucket-changed="onBucketChanged"
+                        on-paginate="onPaginate"
+                        search-tabs-order="searchTabsOrder"
+                        result-tabs-order="resultTabsOrder"
+                        lang="lang"></result-panel>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+</div>

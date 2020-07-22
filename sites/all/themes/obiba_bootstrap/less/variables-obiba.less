@@ -1,0 +1,48 @@
+//== Container sizes
+//
+//## Define the maximum width of `.container` for different screen sizes.
+.searchCount() {
+  font-size: 125%;
+  font-weight: bold;
+  margin-top: 10px;
+  color: #777777;
+}
+@import "flaticon.less";
+@import "font-awesome/font-awesome.less";
+
+@errorText : @brand-danger;
+@errorBorder: @brand-danger;
+
+// Small screen / tablet
+@container-tablet: (720px + @grid-gutter-width);
+//** For `@screen-sm-min` and up.
+@container-sm: @container-tablet;
+
+// Medium screen / desktop
+@container-desktop: (940px + @grid-gutter-width);
+//** For `@screen-md-min` and up.
+@container-md: @container-desktop;
+
+// Large screen / wide desktop
+@container-large-desktop: (1240px + @grid-gutter-width);
+//** For `@screen-lg-min` and up.
+@container-lg: @container-large-desktop;
+
+//** Point at which the navbar becomes uncollapsed.
+@grid-float-breakpoint:     @screen-lg;
+//** Point at which the navbar begins collapsing.
+@grid-float-breakpoint-max: (@grid-float-breakpoint - 1);
+
+@padding-base-vertical:     6px;
+@padding-base-horizontal:   16px;
+
+@obiba-state-success-text: #18bc9c;
+@obiba-state-danger-text: #a94442;
+@obiba-state-warning-text: @brand-warning;
+
+//** Facet var
+@facet_font_size: @font-size-base - 2;
+@facet_line_height: 15px;
+
+@block_title_background_color: #F2F2F2;
+@input-height-small:             (floor(@font-size-small * @line-height-small) + (@padding-small-vertical * 2) + 4) - 1;

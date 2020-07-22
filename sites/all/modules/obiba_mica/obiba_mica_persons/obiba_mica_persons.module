@@ -1,0 +1,142 @@
+<?php
+/**
+ * Copyright (c) 2018 OBiBa. All rights reserved.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * @file
+ * Mica Persons module file
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function obiba_mica_persons_menu() {
+  $items = array();
+
+  $items['admin/config/obiba-mica/obiba-mica-persons-settings'] = array(
+    'title' => 'Persons settings',
+    'description' => 'Configure persons pages.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('obiba_mica_persons_admin_settings'),
+    'access arguments' => array('administer obiba mica'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'obiba_mica_persons.admin.inc',
+    'weight' => 3,
+  );
+
+  $items[MicaClientPersonsPathProvider::PERSONS . '%/ws'] = array(
+    'page callback' => 'obiba_mica_persons_list',
+    'page arguments' => array(2),
+    'file' => 'obiba_mica_persons_service.inc',
+    'access callback' => TRUE,
+  );
+
+  $items[MicaClientPersonsPathProvider::PERSONS . '%/download/ws'] = array(
+    'page callback' => 'obiba_mica_persons_list_csv_download',
+    'page arguments' => array(2),
+    'file' => 'obiba_mica_persons_service.inc',
+    'access callback' => TRUE,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function obiba_mica_persons_theme($existing, $type, $theme, $path) {
+  $path_theme = $path . '/templates';
+
+  return array(
+    'obiba_mica_persons-table' => array(
+      'template' => 'obiba_mica_persons-table',
+      'path' => $path_theme,
+    ),
+    'obiba_mica_persons-modal' => array(
+      'template' => 'obiba_mica_persons-modal',
+      'path' => $path_theme,
+    ),
+    'obiba_mica_persons-button' => array(
+      'template' => 'obiba_mica_persons-button',
+      'path' => $path_theme,
+    ),
+    'obiba_mica_persons-download-csv-button' => array(
+      'template' => 'obiba_mica_persons-download-csv-button',
+      'path' => $path_theme,
+    ),
+    'mica_person_detail' => array(
+      'template' => 'obiba_mica_persons-modal-person-detail',
+      'path' => $path_theme
+    ),
+  );
+}
+
+/**
+ * Initialize the associated persons dataTables.
+ */
+function obiba_mica_persons_datatable_init($entities_id) {
+  global $language;
+  $current_lang = $language->language;
+  $download_button = theme('obiba_mica_persons-download-csv-button');
+  drupal_add_js(drupal_get_path('module', 'obiba_mica_persons') . '/js/obiba_mica_persons_datatable_init.js',
+    array('type' => 'file', 'weight' => 99));
+  drupal_add_js(array(
+    'resourcePathPersons' => MicaClientPersonsPathProvider::PERSONS,
+    'headerTable' => obiba_mica_persons_table_headers(),
+    'entitiesId' => $entities_id,
+    'current_lang' => $current_lang,
+    'download_button' => $download_button,
+  ), 'setting');
+}
+
+/**
+ * Initialize the header persons dataTables.
+ */
+function obiba_mica_persons_table_headers() {
+  $localize = obiba_mica_commons_mica_server_localisation();
+  return array(
+    array("title" => $localize->getTranslation('contact.name'), 'data' => 'firstName', "width" => "20%"),
+    array("title" => $localize->getTranslation('contact.email'), 'data' => 'email', "width" => "30%"),
+    array("title" => $localize->getTranslation('studies'), 'data' => 'studyMemberships'),
+    array("title" => $localize->getTranslation('networks'), 'data' => 'networkMemberships'),
+  );
+}
+
+/**
+ * Generates a jQuery-safe ID for referencing the person modal.
+ *
+ * @param $type_person
+ * @param $study_id
+ * @param $person
+ */
+function obiba_mica_person_generate_target_id($type_person, $document_id, $person) {
+  return MicaClientPathHelpers::normalizeModalTarget($type_person . '_' . $document_id . '_' . $person);
+}
+
+/**
+ * Create modal DOM for Contacts/investigators.
+ *
+ * @param $study_id
+ * @param $persons
+ * @return string
+ */
+function obiba_mica_persons_get_person_detail($type_person, $study_id, $persons) {
+  $page_render_persons = '';
+  if (!empty($persons)) {
+    foreach ($persons as $key_person => $person) {
+      $id_person = obiba_mica_person_generate_target_id($type_person, $study_id, $key_person);
+      $page_render_persons .= theme('mica_person_detail', array(
+        'study_id' => $study_id,
+        'person_uid' => $id_person,
+        'person' => $person,
+      ));
+    }
+  }
+  return $page_render_persons;
+}

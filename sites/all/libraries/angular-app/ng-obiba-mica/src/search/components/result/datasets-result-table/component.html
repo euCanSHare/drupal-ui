@@ -1,0 +1,64 @@
+<div>
+  <div ng-if="loading" class="loading"></div>
+  <div ng-show="!loading">
+
+    <p class="help-block" ng-if="!summaries || !summaries.length" translate>search.dataset.noResults</p>
+    <div class="table-responsive" ng-if="summaries && summaries.length">
+      <table class="table table-bordered table-striped" ng-init="lang = $parent.$parent.lang">
+        <thead>
+          <tr>
+            <th translate ng-if="optionsCols.showDatasetsAcronymColumn">acronym</th>
+            <th translate>name</th>
+            <th translate ng-if="optionsCols.showDatasetsTypeColumn">type</th>
+            <th translate ng-if="optionsCols.showDatasetsNetworkColumn">networks</th>
+            <th translate ng-if="optionsCols.showDatasetsStudiesColumn">studies</th>
+            <th translate ng-if="optionsCols.showDatasetsVariablesColumn">variables</th>
+          </tr>
+        </thead>
+        <tbody test-ref="search-results">
+          <tr ng-if="!summaries || !summaries.length">
+            <td colspan="6" translate>search.dataset.noResults</td>
+          </tr>
+          <tr ng-repeat="summary in summaries">
+            <td ng-if="optionsCols.showDatasetsAcronymColumn">
+              <a ng-href="{{PageUrlService.datasetPage(summary.id, summary.variableType)}}">
+                <localized value="summary.acronym" lang="lang" test-ref="acronym"></localized>
+              </a>
+            </td>
+            <td>
+              <a ng-if="!optionsCols.showDatasetsAcronymColumn" ng-href="{{PageUrlService.datasetPage(summary.id, summary.variableType)}}">
+                <localized value="summary.name" lang="lang"></localized>
+              </a>
+              <localized ng-if="optionsCols.showDatasetsAcronymColumn" value="summary.name" lang="lang"></localized>
+            </td>
+            <td ng-if="optionsCols.showDatasetsTypeColumn">
+              <localized value="classNames[(summary.variableType === 'Collected' ? 'Study' : 'Harmonization') + 'Dataset']" lang="lang"></localized>
+            </td>
+            <td ng-if="optionsCols.showDatasetsNetworkColumn">
+              <cell-stat-value ng-if="summary['obiba.mica.CountStatsDto.datasetCountStats'].networks"
+                               result-tab-order="resultTabOrder"
+                               destination-tab="network"
+                               entity-count="summary['obiba.mica.CountStatsDto.datasetCountStats'].networks"
+                               update-criteria="updateCriteria(summary.id, 'networks')"></cell-stat-value>
+              <span ng-if="!summary['obiba.mica.CountStatsDto.datasetCountStats'].networks">-</span>
+            </td>
+            <td ng-if="optionsCols.showDatasetsStudiesColumn">
+              <cell-stat-value ng-if="summary['obiba.mica.CountStatsDto.datasetCountStats'].studies"
+                               result-tab-order="resultTabOrder"
+                               destination-tab="study"
+                               entity-count="summary['obiba.mica.CountStatsDto.datasetCountStats'].studies"
+                               update-criteria="updateCriteria(summary.id, 'studies')"></cell-stat-value>
+              <span ng-if="!summary['obiba.mica.CountStatsDto.datasetCountStats'].studies">-</span>
+            </td>
+            <td ng-if="optionsCols.showDatasetsVariablesColumn">
+              <cell-stat-value result-tab-order="resultTabOrder"
+                               destination-tab="variable"
+                               entity-count="summary['obiba.mica.CountStatsDto.datasetCountStats'].variables"
+                               update-criteria="updateCriteria(summary.id, 'variables')"></cell-stat-value>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

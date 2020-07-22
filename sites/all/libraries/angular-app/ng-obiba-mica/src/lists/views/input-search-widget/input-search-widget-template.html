@@ -1,0 +1,15 @@
+<form class="list-search-widget">
+    <div class="form-group pull-left">
+        <entity-search-typeahead
+                placeholder-text="global.list-search-placeholder"
+                target="target"
+                rql-query="rqlQuery"
+                entity-type="type">
+        </entity-search-typeahead>
+    </div>
+    <div class="pull-left voffset2 hoffset2">
+        <small><a href ng-href="{{navigateToSearchPage()}}">
+            {{'search.advanced-button' | translate}}
+        </a></small>
+    </div>
+</form>

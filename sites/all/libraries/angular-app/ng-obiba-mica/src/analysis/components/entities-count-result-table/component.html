@@ -1,0 +1,51 @@
+<div>
+  <p class="help-block" ng-if="$ctrl.result && $ctrl.result.query && (!$ctrl.result.counts || $ctrl.result.counts.length === 0)" translate>search.no-results</p>
+  <table class="table table-bordered table-striped" ng-if="$ctrl.result && $ctrl.result.counts && $ctrl.result.counts.length>0">
+    <thead>
+      <th ng-if="$ctrl.showStudyColumn()" translate>taxonomy.target.study</th>
+      <th translate>taxonomy.target.variable</th>
+      <th translate>taxonomy.target.dataset</th>
+      <th style="width: 400px" translate>analysis.criteria</th>
+      <th style="width: 100px" translate>analysis.count</th>
+    </thead>
+    <tbody>
+        <tr ng-repeat="row in $ctrl.table.rows">
+          <td ng-if="row[0].rowspan>0 && $ctrl.showStudyColumn()" colspan="{{row[0].colspan}}" rowspan="{{row[0].rowspan}}" title="{{row[0].title}}">
+            <a href="{{row[0].link}}">{{row[0].value}}</a>
+          </td>
+          
+          <!-- per variable criteria -->
+          <td ng-if="row.length===5" colspan="{{row[1].colspan}}">
+              <a href="{{row[1].link}}">{{row[1].value}}</a>
+              <div class="help-block">{{row[1].title}}</div>
+          </td>
+          <td ng-if="row.length===5" colspan="{{row[2].colspan}}" title="{{row[2].title}}">
+              <a href="{{row[2].link}}">{{row[2].value}}</a>
+          </td>
+          <td ng-if="row.length===5" colspan="{{row[3].colspan}}">
+            <variable-criteria query="row[3].value"></variable-criteria>  
+          </td>
+          <td ng-if="row.length===5" colspan="{{row[4].colspan}}">
+            {{row[4].value}}
+          </td>
+
+          <!-- all criteria -->
+          <td ng-if="row.length===3" colspan="{{row[1].colspan}}" title="{{row[1].title}}">
+            <b translate>analysis.all-criteria</b>
+          </td>
+          <td ng-if="row.length===3" colspan="{{row[2].colspan}}">
+            <span ng-if="$ctrl.studyCount === 1" class="badge">{{$ctrl.localizedTotal}}</span>
+            <b ng-if="$ctrl.studyCount > 1">{{row[2].value}}</b>
+          </td>
+        </tr>
+        <tr ng-if="$ctrl.studyCount > 1">
+          <td colspan="{{$ctrl.showStudyColumn() ? 4 : 3}}">
+            <b translate>total</b>
+          </td>
+          <td>
+            <span class="badge">{{$ctrl.localizedTotal}}</span>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,159 @@
+<?php
+/**
+ * Copyright (c) 2018 OBiBa. All rights reserved.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the GNU Public License v3.0.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * @file code for obiba_mica_analysis module
+ */
+function obiba_mica_analysis_menu() {
+  $items = array();
+
+  $items['admin/config/obiba-mica/obiba-mica-analysis-settings'] = array(
+    'title' => 'Analysis settings',
+    'description' => 'Configure analysis pages.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('obiba_mica_analysis_admin_settings'),
+    'access arguments' => array('administer obiba mica'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'obiba_mica_analysis.admin.inc',
+    'weight' => 3,
+  );
+
+  $items[ObibaAnalysisResources::MICA_ANALYSIS . '/entities_count/ws'] = array(
+    'page callback' => 'obiba_mica_analysis_entities_count_query',
+    'file' => 'obiba_mica_analysis_services.inc',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+
+function obiba_mica_analysis_crosstab_title() {
+  $localize = obiba_mica_commons_mica_server_localisation();
+  return $localize->getTranslation('client.label.dataset.variable-crosstab');
+}
+
+/**
+ * Implements hook_get_js().
+ */
+function obiba_mica_analysis_get_js($weight_js) {
+  if (current_path() == MicaClientPathProvider::ANALYSIS) {
+    $module_path = drupal_get_path('module', 'obiba_mica_analysis');
+    $js = file_scan_directory($module_path . '/js/app', '/.*\.js$/', array('key' => 'name'));
+    ksort($js);
+    foreach ($js as $file_js) {
+      drupal_add_js($file_js->uri, array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => ++$weight_js,
+      ));
+    }
+  }
+  if (current_path() == ObibaAnalysisResources::CROSSTAB) {
+    $module_path = drupal_get_path('module', 'obiba_mica_analysis');
+    $js = file_scan_directory($module_path . '/js/app', '/.*\.js$/', array('key' => 'name'));
+    ksort($js);
+    foreach ($js as $file_js) {
+      drupal_add_js($file_js->uri, array(
+        'type' => 'file',
+        'scope' => 'footer',
+        'weight' => ++$weight_js
+      ));
+    }
+  }
+
+  return ++$weight_js;
+}
+
+/**
+ * Implements hook_load_menus().
+ */
+function obiba_mica_analysis_load_menus() {
+  $items = array();
+
+  $items[MicaClientPathProvider::ANALYSIS] = array(
+    'access callback' => 'obiba_mica_analysis_user_permission',
+    'title' => variable_get('entities_count_page_title', 'Entities Count'),
+    'module_caller' => 'obiba_mica_analysis',
+    'node_page' => !empty(variable_get_value('obiba_mica_analysis_page')) ? variable_get_value('obiba_mica_analysis_page') : NULL,
+    'type' => MENU_CALLBACK,
+    'options' => array('fragment' => 'entities-count'),
+  );
+
+  $items[ObibaAnalysisResources::CROSSTAB] = array(
+    'title callback' => 'obiba_mica_analysis_crosstab_title',
+    'module_caller' => 'obiba_mica_analysis',
+    'access callback' => 'obiba_mica_analysis_user_permission',
+  );
+
+  return $items;
+}
+
+/**
+ * Access entities count page callback
+ *
+ */
+function obiba_mica_analysis_user_permission() {
+  $permitted = user_access('can access analysis');
+  return $permitted;
+}
+
+/**
+ * Implements hook_get_ng_module_to_load().
+ */
+function obiba_mica_analysis_get_ng_module_to_load() {
+    if (current_path() == MicaClientPathProvider::ANALYSIS) {
+    return 'mica.ObibaAnalysis';
+  }
+  if (current_path() == ObibaAnalysisResources::CROSSTAB) {
+    return 'mica.AnalysisVariableCrosstab';
+  }
+  return FALSE;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function obiba_mica_analysis_theme($existing, $type, $theme, $path) {
+  $path_template = $path . '/templates';
+  $path_views = $path . '/js/app/views';
+  return array(
+    'obiba_mica_analysis_main_app' => array(
+      'template' => 'obiba_mica_analysis_main_app',
+      'path' => $path_template,
+    ),
+    'obiba_mica_analysis_entities_count-view-header' => array(
+      'template' => 'obiba_mica_analysis_entities_count-view-header',
+      'path' => $path_views,
+    ),
+  );
+
+}
+
+/**
+ * Main Analysis page
+ */
+function obiba_mica_analysis_variable_page_search() {
+  return theme('obiba_mica_analysis_main_app', array());
+}
+
+/**
+ * Implements hook_permission().
+ */
+function obiba_mica_analysis_permission() {
+  return array(
+    'can access analysis' => array(
+      'title' => t('Can perform analysis'),
+      'description' => t('Only the selected roles can perform analysis (crosstab, entities count, etc.)'),
+    )
+  );
+}
