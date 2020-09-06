@@ -203,12 +203,33 @@
 
   </header>
   <!-- /#page-header -->
-
+    <?php if (drupal_is_front_page()): ?>
+      <h1> euCanSHare Catalogue </h1>
+      </br>
+      <div class="container">
+        <div class="row">
+          <div class="col-xs-4">
+              <p> euCanSHare Catalogue is a discovery tool for cardiovascular research data. </p>
+              <p> It contains multi-level information about heart-related studies aggregating data from cohort-based studies with omics and bioimaging data repositories. </p>
+              <p> Cohorts data includes: </p>
+                <ul>
+                  <li> Data from EU and Canada </li>
+                  <li> European Genome Phenome Archive </li>
+                  <li> EuroBioimaging </li>
+                </ul>
+          </div>  
+          <div class="col-xs-8">
+            <img src="/sites/all/themes/obiba_bootstrap/img/catalogue.png" style="width: 800px;"/>
+          </div>
+        </div>
+      </div>  
+    <?php endif; ?>
   <div class="row">
     <div<?php print $content_column_class; ?>>
     <?php if (!empty($breadcrumb)): print $breadcrumb;
     endif; ?>
     <?php if (!empty($title)): ?>
+      <?php if (!drupal_is_front_page()): ?>
       <h1 class="page-header">
         <?php if (!empty($classes_array['title_page'])) : ?>
           <span
@@ -217,6 +238,7 @@
         <?php endif; ?>
         <?php print $title; ?>
       </h1>
+      <?php endif; ?>
     <?php endif; ?>
     <?php if (!empty($page['obiba_help'])): ?>
       <div class="row ">
